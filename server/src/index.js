@@ -1,0 +1,34 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { errorHandler } = require('./middleware/errorHandler');
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+
+// Health check route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Playlister API'
+  });
+});
+
+// Error handler middleware (must be last)
+app.use(errorHandler);
+
+// Start server
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+// Export for testing
+module.exports = app;
