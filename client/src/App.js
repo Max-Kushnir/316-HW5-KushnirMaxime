@@ -1,32 +1,24 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
-import Welcome from './pages/Welcome';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Playlists from './pages/Playlists';
-import Songs from './pages/Songs';
-import Account from './pages/Account';
-import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
+      <BrowserRouter>
+        <div style={{ background: '#FFE4F3', minHeight: '100vh' }}>
           <Navbar />
-          <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/playlists" element={<Playlists />} />
-            <Route path="/songs" element={<Songs />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+          <div style={{ padding: '20px' }}>
+            <Routes>
+              <Route path="/" element={<div>Welcome Page (TODO)</div>} />
+              <Route path="/login" element={<div>Login Page (TODO)</div>} />
+              <Route path="/register" element={<div>Register Page (TODO)</div>} />
+              <Route path="/playlists" element={<div>Playlists Page (TODO)</div>} />
+              <Route path="/songs" element={<div>Songs Page (TODO)</div>} />
+            </Routes>
+          </div>
         </div>
-      </Router>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
