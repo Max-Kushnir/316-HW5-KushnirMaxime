@@ -221,9 +221,8 @@ const Playlists = () => {
   const dividerStyle = {
     width: "1px",
     backgroundColor: "black",
+    height: "calc(100% - 40px)",
     marginTop: "20px",
-    marginBottom: "20px",
-    alignSelf: "stretch",
   }
 
   const rightPanelStyle = {
