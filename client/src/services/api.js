@@ -83,7 +83,7 @@ const api = {
     fetch(`${API_BASE_URL}/playlists/${playlistId}/songs/reorder`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ songs }),
+      body: JSON.stringify({ songIds: songs }),
       credentials: "include",
     }).then((res) => res.json()),
 

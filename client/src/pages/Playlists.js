@@ -715,7 +715,7 @@ const Playlists = () => {
                             </button>
                           </>
                         )}
-                        {user && !isOwner && (
+                        {user && (
                           <button onClick={() => handleCopyPlaylist(playlist.id)} style={copyButtonStyle}>
                             Copy
                           </button>

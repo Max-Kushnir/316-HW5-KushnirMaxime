@@ -142,12 +142,15 @@ const findById = async (id) => {
   const result = {
     ...pJson,
     owner_username: pJson.owner?.username || null,
-    songs: pJson.playlistSongs
+    playlist_songs: (pJson.playlistSongs || [])
       .sort((a, b) => a.position - b.position)
       .map(ps => ({
-        ...ps.song,
+        id: ps.id,
         position: ps.position,
-        owner_username: ps.song.owner?.username || null
+        song: {
+          ...ps.song,
+          owner_username: ps.song.owner?.username || null
+        }
       }))
   };
 

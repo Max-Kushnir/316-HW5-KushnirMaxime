@@ -16,15 +16,10 @@ const Songs = () => {
   const [playlists, setPlaylists] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Search filters - 3 separate fields (input state)
+  // Search filters - 3 separate fields
   const [searchTitle, setSearchTitle] = useState("")
   const [searchArtist, setSearchArtist] = useState("")
   const [searchYear, setSearchYear] = useState("")
-
-  // Applied filters - only update on search button/Enter (per UC 2.12)
-  const [appliedSearchTitle, setAppliedSearchTitle] = useState("")
-  const [appliedSearchArtist, setAppliedSearchArtist] = useState("")
-  const [appliedSearchYear, setAppliedSearchYear] = useState("")
 
   const [sortBy, setSortBy] = useState("title-asc")
   const [error, setError] = useState("")
@@ -43,7 +38,6 @@ const Songs = () => {
 
   const menuRef = useRef(null)
   const addToPlaylistRef = useRef(null)
-  const submenuRef = useRef(null)
   const [submenuPosition, setSubmenuPosition] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
@@ -53,14 +47,17 @@ const Songs = () => {
 
   useEffect(() => {
     filterAndSortSongs()
-  }, [songs, appliedSearchTitle, appliedSearchArtist, appliedSearchYear, sortBy])
+  }, [songs, searchTitle, searchArtist, searchYear, sortBy])
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const isInsideMenu = menuRef.current && menuRef.current.contains(event.target)
-      const isInsideSubmenu = submenuRef.current && submenuRef.current.contains(event.target)
-      if (!isInsideMenu && !isInsideSubmenu) {
+      // Don't close if clicking inside the portaled submenu
+      const submenuElement = document.querySelector('.playlist-submenu')
+      if (submenuElement && submenuElement.contains(event.target)) {
+        return
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(null)
         setSubmenuOpen(false)
       }
@@ -108,17 +105,17 @@ const Songs = () => {
     }
     let filtered = [...songs]
 
-    // Apply all filters (AND logic) - using applied filters per UC 2.12
-    if (appliedSearchTitle.trim()) {
-      filtered = filtered.filter((song) => song.title.toLowerCase().includes(appliedSearchTitle.toLowerCase()))
+    // Apply all filters (AND logic)
+    if (searchTitle.trim()) {
+      filtered = filtered.filter((song) => song.title.toLowerCase().includes(searchTitle.toLowerCase()))
     }
 
-    if (appliedSearchArtist.trim()) {
-      filtered = filtered.filter((song) => song.artist.toLowerCase().includes(appliedSearchArtist.toLowerCase()))
+    if (searchArtist.trim()) {
+      filtered = filtered.filter((song) => song.artist.toLowerCase().includes(searchArtist.toLowerCase()))
     }
 
-    if (appliedSearchYear.trim()) {
-      filtered = filtered.filter((song) => song.year.toString().includes(appliedSearchYear.trim()))
+    if (searchYear.trim()) {
+      filtered = filtered.filter((song) => song.year.toString().includes(searchYear.trim()))
     }
 
     // Sort
@@ -155,20 +152,13 @@ const Songs = () => {
   }
 
   const handleSearch = () => {
-    // Copy input values to applied values (per UC 2.12 - search on button/Enter only)
-    setAppliedSearchTitle(searchTitle)
-    setAppliedSearchArtist(searchArtist)
-    setAppliedSearchYear(searchYear)
+    filterAndSortSongs()
   }
 
   const handleClear = () => {
-    // Clear both input and applied filters
     setSearchTitle("")
     setSearchArtist("")
     setSearchYear("")
-    setAppliedSearchTitle("")
-    setAppliedSearchArtist("")
-    setAppliedSearchYear("")
   }
 
   const handleCreateSong = async (title, artist, year, youtubeId) => {
@@ -755,7 +745,7 @@ const Songs = () => {
                             Add to Playlist <FaArrowRight style={{ marginLeft: "5px" }} />
 
                             {submenuOpen && ReactDOM.createPortal(
-                              <div ref={submenuRef} className="playlist-submenu" style={submenuStyle}>
+                              <div className="playlist-submenu" style={submenuStyle}>
                                 {playlists.length === 0 ? (
                                   <div style={{ ...submenuItemStyle, cursor: "default" }}>
                                     No playlists available

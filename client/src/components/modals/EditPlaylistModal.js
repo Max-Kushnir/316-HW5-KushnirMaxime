@@ -96,7 +96,7 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
     setDragOverIndex(null)
   }
 
-  // Handle song copy - creates deep copy owned by current user and replaces in playlist
+  // Handle song copy - creates deep copy owned by current user and inserts after original
   const handleCopySong = async (index) => {
     const playlistSong = songs[index]
     const songId = playlistSong.song.id
@@ -109,16 +109,15 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
       const result = await api.copySong(songId)
 
       if (result.success) {
-        const newSong = result.data
+        const newSong = result.data.song
         const previousSongs = [...songs]
         const newSongs = [...songs]
 
-        // Replace the song in this position with the copied song
-        newSongs[index] = {
-          ...newSongs[index],
+        // Insert the copied song after the original
+        newSongs.splice(index + 1, 0, {
           song: newSong,
           song_id: newSong.id
-        }
+        })
 
         pushToUndoStack({
           type: 'COPY_SONG',
@@ -128,10 +127,7 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
 
         setSongs(newSongs)
         setCopiedSongMappings(prev => [...prev, {
-          originalId: songId,
-          newSongId: newSong.id,
-          playlistSongId: playlistSong.id,
-          index
+          newSongId: newSong.id
         }])
         setPendingReorder(true) // Will need to update the playlist_songs
       } else {
@@ -241,6 +237,11 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
       // Remove songs that were deleted
       for (const songId of removedSongIds) {
         await api.removeSongFromPlaylist(playlist.id, songId)
+      }
+
+      // Add copied songs to playlist
+      for (const mapping of copiedSongMappings) {
+        await api.addSongToPlaylist(playlist.id, mapping.newSongId)
       }
 
       // Reorder songs if needed (this handles both reordering and song replacements from copies)
