@@ -31,29 +31,43 @@ const Navbar = () => {
   const navLeftStyle = {
     display: "flex",
     alignItems: "center",
-    gap: "20px",
+    gap: "10px",
   }
 
   const homeButtonStyle = {
-    backgroundColor: "transparent",
-    border: "none",
-    color: "white",
+    backgroundColor: "white",
+    border: "2px solid #FF00FF",
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
     cursor: "pointer",
-    fontSize: "20px",
-    fontWeight: "bold",
+    fontSize: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     transition: "opacity 0.2s",
   }
 
   const navButtonStyle = {
-    backgroundColor: "#9C27B0",
+    backgroundColor: "#7B1FA2",
     color: "white",
     border: "none",
     padding: "8px 16px",
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "14px",
+    fontWeight: "500",
+    transition: "opacity 0.2s",
+  }
+
+  const centerTitleStyle = {
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-50%)",
+    color: "white",
+    fontSize: "20px",
     fontWeight: "bold",
-    transition: "background-color 0.2s",
+    margin: 0,
   }
 
   const accountMenuStyle = {
@@ -61,24 +75,33 @@ const Navbar = () => {
     display: "inline-block",
   }
 
-  const menuButtonStyle = {
+  const accountButtonStyle = {
     backgroundColor: "white",
-    color: "#FF00FF",
-    border: "none",
-    padding: "8px 12px",
-    borderRadius: "4px",
+    border: "2px solid #FF00FF",
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
     cursor: "pointer",
-    fontWeight: "bold",
-    fontSize: "14px",
-    transition: "background-color 0.2s",
+    fontSize: "18px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "opacity 0.2s",
+    overflow: "hidden",
+  }
+
+  const avatarImageStyle = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
   }
 
   const dropdownStyle = {
     position: "absolute",
     top: "50px",
     right: "0",
-    backgroundColor: "white",
-    border: "1px solid #ddd",
+    backgroundColor: "#E1BEE7",
+    border: "2px dashed #9C27B0",
     borderRadius: "4px",
     minWidth: "150px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
@@ -88,65 +111,74 @@ const Navbar = () => {
   const menuItemStyle = {
     display: "block",
     width: "100%",
-    padding: "10px 16px",
+    padding: "12px 16px",
     border: "none",
     backgroundColor: "transparent",
     textAlign: "left",
     cursor: "pointer",
     fontSize: "14px",
-    borderBottom: "1px solid #f0f0f0",
     transition: "background-color 0.2s",
+  }
+
+  const handleHomeClick = () => {
+    if (user) {
+      navigate("/playlists")
+    } else {
+      navigate("/")
+    }
   }
 
   return (
     <nav style={navbarStyle}>
       <div style={navLeftStyle}>
         <button
-          onClick={() => navigate("/")}
-          onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
-          onMouseLeave={(e) => (e.target.style.opacity = "1")}
+          onClick={handleHomeClick}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           style={homeButtonStyle}
         >
-          🎵 Playlister
+          🏠
         </button>
-        {user && (
-          <>
-            <button
-              onClick={() => navigate("/playlists")}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#9C27B0")}
-              style={navButtonStyle}
-            >
-              Playlists
-            </button>
-            <button
-              onClick={() => navigate("/songs")}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#9C27B0")}
-              style={navButtonStyle}
-            >
-              Songs
-            </button>
-          </>
-        )}
+        <button
+          onClick={() => navigate("/playlists")}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          style={navButtonStyle}
+        >
+          Playlists
+        </button>
+        <button
+          onClick={() => navigate("/songs")}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          style={navButtonStyle}
+        >
+          Song Catalog
+        </button>
       </div>
+
+      {user && <div style={centerTitleStyle}>The Playlister</div>}
 
       <div style={accountMenuStyle}>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "white")}
-          style={menuButtonStyle}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          style={accountButtonStyle}
         >
-          {user ? `${user.username}` : "Account"} ▼
+          {user && user.avatar_image ? (
+            <img src={user.avatar_image} alt="Avatar" style={avatarImageStyle} />
+          ) : (
+            <span>{user ? user.username.charAt(0).toUpperCase() : "👤"}</span>
+          )}
         </button>
         {showMenu && (
           <div style={dropdownStyle}>
             {user ? (
               <>
                 <button
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#CE93D8")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#CE93D8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   onClick={() => {
                     navigate("/account")
                     setShowMenu(false)
@@ -156,10 +188,10 @@ const Navbar = () => {
                   Edit Account
                 </button>
                 <button
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#CE93D8")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#CE93D8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   onClick={handleLogout}
-                  style={{ ...menuItemStyle, borderBottom: "none" }}
+                  style={menuItemStyle}
                 >
                   Logout
                 </button>
@@ -167,8 +199,8 @@ const Navbar = () => {
             ) : (
               <>
                 <button
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#CE93D8")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#CE93D8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   onClick={() => {
                     navigate("/login")
                     setShowMenu(false)
@@ -178,15 +210,15 @@ const Navbar = () => {
                   Login
                 </button>
                 <button
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#CE93D8")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#CE93D8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   onClick={() => {
                     navigate("/register")
                     setShowMenu(false)
                   }}
-                  style={{ ...menuItemStyle, borderBottom: "none" }}
+                  style={menuItemStyle}
                 >
-                  Register
+                  Create Account
                 </button>
               </>
             )}
