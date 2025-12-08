@@ -48,20 +48,31 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
   }
 
   const modalStyle = {
-    backgroundColor: "#C8E6C9",
+    backgroundColor: "#90EE90",
     borderRadius: "8px",
-    padding: "30px",
-    maxWidth: "600px",
+    maxWidth: "900px",
     width: "90%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    overflow: "hidden",
   }
 
-  const headerStyle = {
-    fontSize: "20px",
+  const modalHeaderStyle = {
+    backgroundColor: "#228B22",
+    padding: "12px 16px",
+    color: "white",
     fontWeight: "bold",
-    color: "#228B22",
-    marginBottom: "20px",
-    textAlign: "center",
+    fontSize: "18px",
+  }
+
+  const modalBodyStyle = {
+    padding: "20px",
+    backgroundColor: "#90EE90",
+  }
+
+  const twoColumnLayoutStyle = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
   }
 
   const playerContainerStyle = {
@@ -128,7 +139,7 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
     padding: "8px",
     borderBottom: "1px solid #eee",
     fontSize: "12px",
-    backgroundColor: isActive ? "#E8F5E9" : "white",
+    backgroundColor: isActive ? "#FFEB3B" : "white",
     cursor: "pointer",
     fontWeight: isActive ? "bold" : "normal",
   })
@@ -147,43 +158,50 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>{playlist.name}</div>
+        <div style={modalHeaderStyle}>{playlist.name}</div>
+        <div style={modalBodyStyle}>
+          <div style={twoColumnLayoutStyle}>
+            <div>
+              <div style={playerContainerStyle}>
+                <div style={playerPlaceholderStyle}>YouTube Player Coming Soon</div>
+                <div style={controlsStyle}>
+                  <button onClick={handlePrevious} style={controlButtonStyle}>
+                    ⏮ Previous
+                  </button>
+                  <button onClick={handleNext} style={controlButtonStyle}>
+                    Next ⏭
+                  </button>
+                  <button onClick={() => setRepeatMode(repeatMode === "off" ? "all" : "off")} style={repeatButtonStyle}>
+                    Repeat: {repeatMode}
+                  </button>
+                </div>
+                {currentSong && (
+                  <div style={currentSongStyle}>
+                    {currentSong.title} - {currentSong.artist}
+                  </div>
+                )}
+              </div>
+            </div>
 
-        <div style={playerContainerStyle}>
-          <div style={playerPlaceholderStyle}>YouTube Player Coming Soon</div>
-          <div style={controlsStyle}>
-            <button onClick={handlePrevious} style={controlButtonStyle}>
-              ⏮ Previous
-            </button>
-            <button onClick={handleNext} style={controlButtonStyle}>
-              Next ⏭
-            </button>
-            <button onClick={() => setRepeatMode(repeatMode === "off" ? "all" : "off")} style={repeatButtonStyle}>
-              Repeat: {repeatMode}
-            </button>
+            <div>
+              <div style={playlistSongsStyle}>
+                {songs.map((playlistSong, index) => (
+                  <div
+                    key={playlistSong.id}
+                    onClick={() => setCurrentSongIndex(index)}
+                    style={songItemStyle(index === currentSongIndex)}
+                  >
+                    {index + 1}. {playlistSong.song?.title} - {playlistSong.song?.artist}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          {currentSong && (
-            <div style={currentSongStyle}>
-              {currentSong.title} - {currentSong.artist}
-            </div>
-          )}
-        </div>
 
-        <div style={playlistSongsStyle}>
-          {songs.map((playlistSong, index) => (
-            <div
-              key={playlistSong.id}
-              onClick={() => setCurrentSongIndex(index)}
-              style={songItemStyle(index === currentSongIndex)}
-            >
-              {index + 1}. {playlistSong.song?.title} - {playlistSong.song?.artist}
-            </div>
-          ))}
+          <button onClick={onClose} style={closeButtonStyle}>
+            Close
+          </button>
         </div>
-
-        <button onClick={onClose} style={closeButtonStyle}>
-          Close
-        </button>
       </div>
     </div>
   )

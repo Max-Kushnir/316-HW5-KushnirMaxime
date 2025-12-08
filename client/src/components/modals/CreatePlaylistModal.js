@@ -30,19 +30,25 @@ const CreatePlaylistModal = ({ onClose, onCreate }) => {
   }
 
   const modalStyle = {
-    backgroundColor: "#C8E6C9",
+    backgroundColor: "#90EE90",
     borderRadius: "8px",
-    padding: "30px",
-    maxWidth: "400px",
+    maxWidth: "600px",
     width: "90%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    overflow: "hidden",
   }
 
-  const headerStyle = {
-    fontSize: "20px",
+  const modalHeaderStyle = {
+    backgroundColor: "#228B22",
+    padding: "12px 16px",
+    color: "white",
     fontWeight: "bold",
-    color: "#228B22",
-    marginBottom: "20px",
+    fontSize: "18px",
+  }
+
+  const modalBodyStyle = {
+    padding: "20px",
+    backgroundColor: "#90EE90",
   }
 
   const formGroupStyle = {
@@ -95,28 +101,30 @@ const CreatePlaylistModal = ({ onClose, onCreate }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>Create New Playlist</div>
-        <form onSubmit={handleSubmit}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Playlist Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter playlist name"
-              autoFocus
-              style={inputStyle}
-            />
-          </div>
-          <div style={buttonsContainerStyle}>
-            <button type="button" onClick={onClose} style={cancelButtonStyle}>
-              Cancel
-            </button>
-            <button type="submit" disabled={loading || !name.trim()} style={submitButtonStyle}>
-              {loading ? "Creating..." : "Create"}
-            </button>
-          </div>
-        </form>
+        <div style={modalHeaderStyle}>Create New Playlist</div>
+        <div style={modalBodyStyle}>
+          <form onSubmit={handleSubmit}>
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>Playlist Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter playlist name"
+                autoFocus
+                style={inputStyle}
+              />
+            </div>
+            <div style={buttonsContainerStyle}>
+              <button type="button" onClick={onClose} style={cancelButtonStyle}>
+                Cancel
+              </button>
+              <button type="submit" disabled={loading || !name.trim()} style={submitButtonStyle}>
+                {loading ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

@@ -4,6 +4,44 @@ import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 
+// InputWithClear component OUTSIDE the main component to prevent re-creation on render
+const InputWithClear = ({ value, onChange, type = "text", inputStyle, ...props }) => (
+  <div style={{ position: "relative" }}>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      style={{
+        ...inputStyle,
+        paddingRight: value ? "35px" : "12px",
+      }}
+      {...props}
+    />
+    {value && (
+      <button
+        type="button"
+        onClick={() => onChange({ target: { value: "" } })}
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "#999",
+          fontSize: "18px",
+          padding: "0",
+          lineHeight: "1",
+        }}
+        aria-label="Clear"
+      >
+        ⊗
+      </button>
+    )}
+  </div>
+)
+
 const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -25,44 +63,6 @@ const Login = () => {
     }
     setLoading(false)
   }
-
-  // InputWithClear component for fields with clear button
-  const InputWithClear = ({ value, onChange, type = "text", ...props }) => (
-    <div style={{ position: "relative" }}>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        style={{
-          ...inputStyle,
-          paddingRight: value ? "35px" : "12px",
-        }}
-        {...props}
-      />
-      {value && (
-        <button
-          type="button"
-          onClick={() => onChange({ target: { value: "" } })}
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#999",
-            fontSize: "18px",
-            padding: "0",
-            lineHeight: "1",
-          }}
-          aria-label="Clear"
-        >
-          ⊗
-        </button>
-      )}
-    </div>
-  )
 
   const containerStyle = {
     display: "flex",
@@ -175,12 +175,12 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
           <div style={formGroupStyle}>
             <label style={labelStyle}>Email</label>
-            <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
           </div>
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Password</label>
-            <InputWithClear type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <InputWithClear type="password" value={password} onChange={(e) => setPassword(e.target.value)} required inputStyle={inputStyle} />
           </div>
 
           <button type="submit" disabled={loading} style={submitButtonStyle}>

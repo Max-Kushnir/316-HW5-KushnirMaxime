@@ -66,20 +66,26 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
   }
 
   const modalStyle = {
-    backgroundColor: "#C8E6C9",
+    backgroundColor: "#90EE90",
     borderRadius: "8px",
-    padding: "30px",
-    maxWidth: "500px",
+    maxWidth: "600px",
     width: "90%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    overflow: "hidden",
     margin: "20px auto",
   }
 
-  const headerStyle = {
-    fontSize: "20px",
+  const modalHeaderStyle = {
+    backgroundColor: "#228B22",
+    padding: "12px 16px",
+    color: "white",
     fontWeight: "bold",
-    color: "#228B22",
-    marginBottom: "20px",
+    fontSize: "18px",
+  }
+
+  const modalBodyStyle = {
+    padding: "20px",
+    backgroundColor: "#90EE90",
   }
 
   const formGroupStyle = {
@@ -95,12 +101,32 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
     marginBottom: "8px",
   }
 
+  const inputContainerStyle = {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  }
+
   const inputStyle = {
     padding: "10px",
+    paddingRight: "35px",
     fontSize: "14px",
     border: "1px solid #ddd",
     borderRadius: "4px",
     fontFamily: "inherit",
+    flex: 1,
+  }
+
+  const clearButtonStyle = {
+    position: "absolute",
+    right: "8px",
+    background: "none",
+    border: "none",
+    fontSize: "18px",
+    cursor: "pointer",
+    color: "#999",
+    padding: "0",
+    lineHeight: "1",
   }
 
   const songsListStyle = {
@@ -134,7 +160,29 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
   const buttonsContainerStyle = {
     display: "flex",
     gap: "10px",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }
+
+  const undoRedoContainerStyle = {
+    display: "flex",
+    gap: "10px",
+  }
+
+  const undoRedoButtonStyle = {
+    backgroundColor: "#9C27B0",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "14px",
+  }
+
+  const actionButtonsContainerStyle = {
+    display: "flex",
+    gap: "10px",
   }
 
   const submitButtonStyle = {
@@ -160,63 +208,81 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>Edit Playlist</div>
-
-        {error && (
-          <div
-            style={{
-              backgroundColor: "#FFCDD2",
-              color: "#C62828",
-              padding: "8px",
-              borderRadius: "4px",
-              marginBottom: "15px",
-              fontSize: "12px",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSave}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Playlist Name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
-          </div>
-
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Songs ({songs.length})</label>
-            <div style={songsListStyle}>
-              {songs.map((playlistSong) => (
-                <div key={playlistSong.id} style={songItemStyle}>
-                  <span>{playlistSong.song?.title || "Unknown"}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSong(playlistSong.song_id)}
-                    style={removeButtonStyle}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowAddSong(!showAddSong)}
-              style={{ ...inputStyle, backgroundColor: "#90EE90", cursor: "pointer", fontWeight: "bold" }}
+        <div style={modalHeaderStyle}>Edit Playlist</div>
+        <div style={modalBodyStyle}>
+          {error && (
+            <div
+              style={{
+                backgroundColor: "#FFCDD2",
+                color: "#C62828",
+                padding: "8px",
+                borderRadius: "4px",
+                marginBottom: "15px",
+                fontSize: "12px",
+              }}
             >
-              {showAddSong ? "Cancel Add" : "+ Add Song"}
-            </button>
-          </div>
+              {error}
+            </div>
+          )}
 
-          <div style={buttonsContainerStyle}>
-            <button type="button" onClick={onClose} style={cancelButtonStyle} disabled={loading}>
-              Cancel
-            </button>
-            <button type="submit" style={submitButtonStyle} disabled={loading}>
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSave}>
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>Playlist Name</label>
+              <div style={inputContainerStyle}>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+                {name && (
+                  <button type="button" onClick={() => setName("")} style={clearButtonStyle}>
+                    ⊗
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>Songs ({songs.length})</label>
+              <div style={songsListStyle}>
+                {songs.map((playlistSong) => (
+                  <div key={playlistSong.id} style={songItemStyle}>
+                    <span>{playlistSong.song?.title || "Unknown"}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSong(playlistSong.song_id)}
+                      style={removeButtonStyle}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddSong(!showAddSong)}
+                style={{ ...inputStyle, backgroundColor: "#90EE90", cursor: "pointer", fontWeight: "bold" }}
+              >
+                {showAddSong ? "Cancel Add" : "+ Add Song"}
+              </button>
+            </div>
+
+            <div style={buttonsContainerStyle}>
+              <div style={undoRedoContainerStyle}>
+                <button type="button" style={undoRedoButtonStyle} disabled>
+                  Undo
+                </button>
+                <button type="button" style={undoRedoButtonStyle} disabled>
+                  Redo
+                </button>
+              </div>
+              <div style={actionButtonsContainerStyle}>
+                <button type="button" onClick={onClose} style={cancelButtonStyle} disabled={loading}>
+                  Cancel
+                </button>
+                <button type="submit" style={submitButtonStyle} disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

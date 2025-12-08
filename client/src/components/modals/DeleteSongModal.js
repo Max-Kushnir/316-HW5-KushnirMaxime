@@ -19,19 +19,25 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
   }
 
   const modalStyle = {
-    backgroundColor: "#FFCDD2",
+    backgroundColor: "#90EE90",
     borderRadius: "8px",
-    padding: "30px",
-    maxWidth: "400px",
+    maxWidth: "600px",
     width: "90%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    overflow: "hidden",
   }
 
-  const headerStyle = {
-    fontSize: "18px",
+  const modalHeaderStyle = {
+    backgroundColor: "#228B22",
+    padding: "12px 16px",
+    color: "white",
     fontWeight: "bold",
-    color: "#C62828",
-    marginBottom: "15px",
+    fontSize: "18px",
+  }
+
+  const modalBodyStyle = {
+    padding: "20px",
+    backgroundColor: "#90EE90",
   }
 
   const messageStyle = {
@@ -54,7 +60,7 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
   }
 
   const deleteButtonStyle = {
-    backgroundColor: "#C62828",
+    backgroundColor: "#E91E63",
     color: "white",
     border: "none",
     padding: "10px 20px",
@@ -64,7 +70,7 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
   }
 
   const cancelButtonStyle = {
-    backgroundColor: "#EF9A9A",
+    backgroundColor: "#90EE90",
     color: "black",
     border: "none",
     padding: "10px 20px",
@@ -76,18 +82,20 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>Delete Song?</div>
-        <div style={messageStyle}>
-          Are you sure you want to delete "{song.title}" by {song.artist}?
-        </div>
-        <div style={warningStyle}>This song will be removed from all playlists. This action cannot be undone.</div>
-        <div style={buttonsContainerStyle}>
-          <button onClick={onClose} style={cancelButtonStyle}>
-            Cancel
-          </button>
-          <button onClick={handleDelete} style={deleteButtonStyle}>
-            Delete
-          </button>
+        <div style={modalHeaderStyle}>Delete Song?</div>
+        <div style={modalBodyStyle}>
+          <div style={messageStyle}>
+            Are you sure you want to delete "{song.title}" by {song.artist}?
+          </div>
+          <div style={warningStyle}>This song will be removed from all playlists. This action cannot be undone.</div>
+          <div style={buttonsContainerStyle}>
+            <button onClick={onClose} style={cancelButtonStyle}>
+              Cancel
+            </button>
+            <button onClick={handleDelete} style={deleteButtonStyle}>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>

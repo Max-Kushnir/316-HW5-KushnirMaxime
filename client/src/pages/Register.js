@@ -4,6 +4,44 @@ import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 
+// InputWithClear component OUTSIDE the main component to prevent re-creation on render
+const InputWithClear = ({ value, onChange, type = "text", inputStyle, ...props }) => (
+  <div style={{ position: "relative" }}>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      style={{
+        ...inputStyle,
+        paddingRight: value ? "35px" : "12px",
+      }}
+      {...props}
+    />
+    {value && (
+      <button
+        type="button"
+        onClick={() => onChange({ target: { value: "" } })}
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "#999",
+          fontSize: "18px",
+          padding: "0",
+          lineHeight: "1",
+        }}
+        aria-label="Clear"
+      >
+        ⊗
+      </button>
+    )}
+  </div>
+)
+
 const Register = () => {
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
@@ -61,43 +99,6 @@ const Register = () => {
     password === confirmPassword &&
     avatar !== null
 
-  // InputWithClear component for fields with clear button
-  const InputWithClear = ({ value, onChange, type = "text", ...props }) => (
-    <div style={{ position: "relative" }}>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        style={{
-          ...inputStyle,
-          paddingRight: value ? "35px" : "12px",
-        }}
-        {...props}
-      />
-      {value && (
-        <button
-          type="button"
-          onClick={() => onChange({ target: { value: "" } })}
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#999",
-            fontSize: "18px",
-            padding: "0",
-            lineHeight: "1",
-          }}
-          aria-label="Clear"
-        >
-          ⊗
-        </button>
-      )}
-    </div>
-  )
 
   const containerStyle = {
     display: "flex",
@@ -260,13 +261,13 @@ const Register = () => {
             {/* User Name - SECOND per Section 5.2 */}
             <div style={formGroupStyle}>
               <label style={labelStyle}>User Name</label>
-              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
             </div>
 
             {/* Email - THIRD per Section 5.2 */}
             <div style={formGroupStyle}>
               <label style={labelStyle}>Email</label>
-              <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
             </div>
 
             {/* Password - FOURTH per Section 5.2 */}
@@ -277,6 +278,7 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                inputStyle={inputStyle}
               />
             </div>
 
@@ -288,6 +290,7 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                inputStyle={inputStyle}
               />
             </div>
 

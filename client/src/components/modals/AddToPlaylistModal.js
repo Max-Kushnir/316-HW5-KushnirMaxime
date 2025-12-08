@@ -33,19 +33,25 @@ const AddToPlaylistModal = ({ song, playlists, onClose, onAdd }) => {
   }
 
   const modalStyle = {
-    backgroundColor: "#C8E6C9",
+    backgroundColor: "#90EE90",
     borderRadius: "8px",
-    padding: "30px",
-    maxWidth: "400px",
+    maxWidth: "600px",
     width: "90%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    overflow: "hidden",
   }
 
-  const headerStyle = {
-    fontSize: "20px",
+  const modalHeaderStyle = {
+    backgroundColor: "#228B22",
+    padding: "12px 16px",
+    color: "white",
     fontWeight: "bold",
-    color: "#228B22",
-    marginBottom: "20px",
+    fontSize: "18px",
+  }
+
+  const modalBodyStyle = {
+    padding: "20px",
+    backgroundColor: "#90EE90",
   }
 
   const songInfoStyle = {
@@ -117,55 +123,56 @@ const AddToPlaylistModal = ({ song, playlists, onClose, onAdd }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={headerStyle}>Add to Playlist</div>
-
-        <div style={songInfoStyle}>
-          <strong>{song.title}</strong> by {song.artist}
-        </div>
-
-        {error && <div style={errorStyle}>{error}</div>}
-
-        {playlists.length === 0 ? (
-          <div
-            style={{
-              backgroundColor: "#FFECB3",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "20px",
-              fontSize: "12px",
-              color: "#333",
-            }}
-          >
-            You don't have any playlists yet. Create one first!
+        <div style={modalHeaderStyle}>Add to Playlist</div>
+        <div style={modalBodyStyle}>
+          <div style={songInfoStyle}>
+            <strong>{song.title}</strong> by {song.artist}
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Select Playlist *</label>
-              <select
-                value={selectedPlaylistId}
-                onChange={(e) => setSelectedPlaylistId(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="">-- Choose a playlist --</option>
-                {playlists.map((playlist) => (
-                  <option key={playlist.id} value={playlist.id}>
-                    {playlist.name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div style={buttonsContainerStyle}>
-              <button type="button" onClick={onClose} style={cancelButtonStyle} disabled={loading}>
-                Cancel
-              </button>
-              <button type="submit" disabled={loading || !selectedPlaylistId} style={submitButtonStyle}>
-                {loading ? "Adding..." : "Add"}
-              </button>
+          {error && <div style={errorStyle}>{error}</div>}
+
+          {playlists.length === 0 ? (
+            <div
+              style={{
+                backgroundColor: "#FFECB3",
+                padding: "10px",
+                borderRadius: "4px",
+                marginBottom: "20px",
+                fontSize: "12px",
+                color: "#333",
+              }}
+            >
+              You don't have any playlists yet. Create one first!
             </div>
-          </form>
-        )}
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Select Playlist *</label>
+                <select
+                  value={selectedPlaylistId}
+                  onChange={(e) => setSelectedPlaylistId(e.target.value)}
+                  style={selectStyle}
+                >
+                  <option value="">-- Choose a playlist --</option>
+                  {playlists.map((playlist) => (
+                    <option key={playlist.id} value={playlist.id}>
+                      {playlist.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={buttonsContainerStyle}>
+                <button type="button" onClick={onClose} style={cancelButtonStyle} disabled={loading}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={loading || !selectedPlaylistId} style={submitButtonStyle}>
+                  {loading ? "Adding..." : "Add"}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )

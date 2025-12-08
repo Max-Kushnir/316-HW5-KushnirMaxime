@@ -4,6 +4,47 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 
+// InputWithClear component OUTSIDE the main component to prevent re-creation on render
+const InputWithClear = ({ value, onChange, type = "text", disabled = false, inputStyle, ...props }) => (
+  <div style={{ position: "relative" }}>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      style={{
+        ...inputStyle,
+        paddingRight: value && !disabled ? "35px" : "12px",
+        backgroundColor: disabled ? "#e0e0e0" : "white",
+        cursor: disabled ? "not-allowed" : "text",
+      }}
+      {...props}
+    />
+    {value && !disabled && (
+      <button
+        type="button"
+        onClick={() => onChange({ target: { value: "" } })}
+        style={{
+          position: "absolute",
+          right: "10px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          color: "#999",
+          fontSize: "18px",
+          padding: "0",
+          lineHeight: "1",
+        }}
+        aria-label="Clear"
+      >
+        ⊗
+      </button>
+    )}
+  </div>
+)
+
 const Account = () => {
   const { user, updateProfile } = useAuth()
   const navigate = useNavigate()
@@ -68,46 +109,6 @@ const Account = () => {
     setLoading(false)
   }
 
-  // InputWithClear component for fields with clear button
-  const InputWithClear = ({ value, onChange, type = "text", disabled = false, ...props }) => (
-    <div style={{ position: "relative" }}>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        style={{
-          ...inputStyle,
-          paddingRight: value && !disabled ? "35px" : "12px",
-          backgroundColor: disabled ? "#e0e0e0" : "white",
-          cursor: disabled ? "not-allowed" : "text",
-        }}
-        {...props}
-      />
-      {value && !disabled && (
-        <button
-          type="button"
-          onClick={() => onChange({ target: { value: "" } })}
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#999",
-            fontSize: "18px",
-            padding: "0",
-            lineHeight: "1",
-          }}
-          aria-label="Clear"
-        >
-          ⊗
-        </button>
-      )}
-    </div>
-  )
 
   const containerStyle = {
     display: "flex",
@@ -284,7 +285,7 @@ const Account = () => {
             {/* User Name - SECOND per Section 5.3 */}
             <div style={formGroupStyle}>
               <label style={labelStyle}>User Name</label>
-              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
             </div>
 
             {/* Email - THIRD per Section 5.3 (read-only/disabled) */}
@@ -295,6 +296,7 @@ const Account = () => {
                 value={user?.email || ""}
                 onChange={() => {}}
                 disabled={true}
+                inputStyle={inputStyle}
               />
               <div style={helperTextStyle}>(email cannot be changed)</div>
             </div>
@@ -307,6 +309,7 @@ const Account = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
+                inputStyle={inputStyle}
               />
               <div style={helperTextStyle}>(optional)</div>
             </div>
@@ -319,6 +322,7 @@ const Account = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
+                inputStyle={inputStyle}
               />
             </div>
 
