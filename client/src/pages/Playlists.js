@@ -101,9 +101,9 @@ const Playlists = () => {
         case "listeners-lo-hi":
           return (a.listener_count || 0) - (b.listener_count || 0)
         case "name-asc":
-          return a.name.localeCompare(b.name)
+          return (a.name || '').localeCompare(b.name || '')
         case "name-desc":
-          return b.name.localeCompare(a.name)
+          return (b.name || '').localeCompare(a.name || '')
         case "owner-asc":
           return (a.owner?.username || "").localeCompare(b.owner?.username || "")
         case "owner-desc":
@@ -143,7 +143,7 @@ const Playlists = () => {
     try {
       const result = await api.createPlaylist(name)
       if (result.success) {
-        setPlaylists([...playlists, result.data])
+        setPlaylists([...playlists, result.data.playlist])
         setShowCreateModal(false)
       } else {
         setError(result.message || "Failed to create playlist")
@@ -157,7 +157,7 @@ const Playlists = () => {
     try {
       const result = await api.updatePlaylist(id, name)
       if (result.success) {
-        setPlaylists(playlists.map((p) => (p.id === id ? result.data : p)))
+        setPlaylists(playlists.map((p) => (p.id === id ? result.data.playlist : p)))
         setShowEditModal(false)
         setSelectedPlaylist(null)
       } else {
@@ -187,7 +187,7 @@ const Playlists = () => {
     try {
       const result = await api.copyPlaylist(id)
       if (result.success) {
-        setPlaylists([...playlists, result.data])
+        setPlaylists([...playlists, result.data.playlist])
       } else {
         setError(result.message || "Failed to copy playlist")
       }
@@ -198,38 +198,34 @@ const Playlists = () => {
 
   // Styles
   const containerStyle = {
-    minHeight: "calc(100vh - 50px)",
+    height: "100%",
     backgroundColor: "#FFFDE7",
     padding: "0",
+    overflow: "hidden",
   }
 
   const twoColumnLayoutStyle = {
     display: "flex",
-    minHeight: "calc(100vh - 50px)",
+    height: "100%",
     gap: "0",
   }
 
   const leftPanelStyle = {
-    width: "280px",
+    width: "40%",
     backgroundColor: "#FFFDE7",
     padding: "20px",
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-  }
-
-  const dividerStyle = {
-    width: "1px",
-    backgroundColor: "black",
-    height: "calc(100% - 40px)",
-    marginTop: "20px",
+    overflow: "hidden",
   }
 
   const rightPanelStyle = {
-    flex: 1,
+    width: "60%",
     padding: "20px",
     display: "flex",
     flexDirection: "column",
+    overflow: "hidden",
   }
 
   const panelTitleStyle = {
@@ -356,6 +352,14 @@ const Playlists = () => {
     gap: "12px",
     flex: 1,
     overflowY: "auto",
+  }
+
+  const resultsListStyle = {
+    flex: 1,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
   }
 
   const playlistCardStyle = {
@@ -607,7 +611,9 @@ const Playlists = () => {
         </div>
 
         {/* Vertical Divider */}
-        <div style={dividerStyle} />
+        <div style={{ padding: "20px 0", alignSelf: "stretch" }}>
+          <div style={{ width: "1px", height: "100%", backgroundColor: "black" }} />
+        </div>
 
         {/* Right Panel - Results */}
         <div style={rightPanelStyle}>
@@ -639,14 +645,14 @@ const Playlists = () => {
             </div>
           </div>
 
-          {/* Playlists List */}
-          {filteredPlaylists.length === 0 ? (
-            <div style={emptyStateStyle}>
-              <p>No playlists found. {user ? "Create your first playlist!" : "Login to create playlists."}</p>
-            </div>
-          ) : (
-            <div style={playlistsListStyle}>
-              {filteredPlaylists.map((playlist) => {
+          {/* Playlists List - Scrollable Container */}
+          <div style={resultsListStyle}>
+            {filteredPlaylists.length === 0 ? (
+              <div style={emptyStateStyle}>
+                <p>No playlists found. {user ? "Create your first playlist!" : "Login to create playlists."}</p>
+              </div>
+            ) : (
+              filteredPlaylists.map((playlist) => {
                 const isOwner = user?.id === playlist.owner_id
                 const isExpanded = expandedPlaylistIds.has(playlist.id)
                 const songs = playlist.playlist_songs || []
@@ -727,9 +733,9 @@ const Playlists = () => {
                     <p style={listenerCountStyle}>{playlist.listener_count || 0} Listeners</p>
                   </div>
                 )
-              })}
-            </div>
-          )}
+              })
+            )}
+          </div>
         </div>
       </div>
 

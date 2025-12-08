@@ -77,7 +77,17 @@ const createPlaylist = async (req, res, next) => {
 
     const playlist = await playlistService.create(name, ownerId);
 
-    sendSuccess(res, 201, { playlist }, 'Playlist created successfully');
+    // Attach owner info for immediate UI display (avoids extra DB query)
+    const playlistWithOwner = {
+      ...playlist,
+      owner: {
+        username: req.user.username
+      },
+      owner_username: req.user.username,
+      song_count: 0  // New playlist has no songs
+    };
+
+    sendSuccess(res, 201, { playlist: playlistWithOwner }, 'Playlist created successfully');
   } catch (error) {
     next(error);
   }

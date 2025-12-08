@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await api.getCurrentUser()
         if (response.success) {
-          setUser(response.data)
+          setUser(response.data.user)
         }
       } catch (err) {
         console.error("Auth check failed:", err)
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
       setError(null)
       const response = await api.updateUserProfile(username, password, avatarImage)
       if (response.success) {
-        setUser(response.data)
+        setUser(response.data.user)
         return response
       } else {
         setError(response.message || "Update failed")

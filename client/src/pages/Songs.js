@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import ReactDOM from "react-dom"
 import { FaSearch, FaArrowRight } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 import api from "../services/api"
@@ -36,6 +37,8 @@ const Songs = () => {
   const [selectedSong, setSelectedSong] = useState(null) // For modals
 
   const menuRef = useRef(null)
+  const addToPlaylistRef = useRef(null)
+  const [submenuPosition, setSubmenuPosition] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
     fetchSongs()
@@ -231,39 +234,42 @@ const Songs = () => {
 
   // Styles
   const containerStyle = {
-    minHeight: "calc(100vh - 50px)",
+    height: "100%",
     backgroundColor: "#FFFDE7",
     padding: "0",
+    overflow: "hidden",
   }
 
   const twoColumnLayoutStyle = {
     display: "flex",
-    minHeight: "calc(100vh - 50px)",
+    height: "100%",
     gap: "0",
   }
 
   const leftPanelStyle = {
-    width: "280px",
+    width: "40%",
     backgroundColor: "#FFFDE7",
     padding: "20px",
     display: "flex",
     flexDirection: "column",
     gap: "12px",
+    overflow: "hidden",
   }
 
   const rightPanelStyle = {
-    flex: 1,
+    width: "60%",
     padding: "20px",
-    backgroundColor: "#FFFDE7",
     display: "flex",
     flexDirection: "column",
+    overflow: "hidden",
   }
 
-  const dividerStyle = {
-    width: "1px",
-    backgroundColor: "black",
-    height: "calc(100% - 40px)",
-    marginTop: "20px",
+  const resultsListStyle = {
+    flex: 1,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
   }
 
   const panelTitleStyle = {
@@ -404,13 +410,6 @@ const Songs = () => {
     fontSize: "14px",
   }
 
-  const songsListStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    flex: 1,
-    overflowY: "auto",
-  }
 
   const getSongCardStyle = (song) => {
     const isOwned = user?.id === song.owner_id
@@ -461,7 +460,7 @@ const Songs = () => {
     position: "absolute",
     top: "40px",
     right: "10px",
-    backgroundColor: "#E1BEE7",
+    backgroundColor: "#FFFFFF",
     border: "1px solid #9C27B0",
     borderRadius: "4px",
     boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
@@ -483,16 +482,17 @@ const Songs = () => {
   }
 
   const submenuStyle = {
-    position: "absolute",
-    top: "0",
-    left: "100%",
+    position: "fixed",
+    top: submenuPosition.top,
+    left: submenuPosition.left,
     backgroundColor: "#FFCDD2",
     border: "1px solid #E91E63",
     borderRadius: "4px",
     boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-    minWidth: "200px",
-    maxHeight: "300px",
+    minWidth: "160px",
+    maxHeight: "120px",
     overflowY: "auto",
+    zIndex: 1001,
   }
 
   const submenuItemStyle = {
@@ -540,7 +540,24 @@ const Songs = () => {
   }
 
   return (
-    <div style={containerStyle}>
+    <>
+      <style>{`
+        .playlist-submenu::-webkit-scrollbar {
+          width: 8px;
+        }
+        .playlist-submenu::-webkit-scrollbar-track {
+          background: #2196F3;
+          border-radius: 4px;
+        }
+        .playlist-submenu::-webkit-scrollbar-thumb {
+          background: #000000;
+          border-radius: 4px;
+        }
+        .playlist-submenu::-webkit-scrollbar-thumb:hover {
+          background: #333333;
+        }
+      `}</style>
+      <div style={containerStyle}>
       <div style={twoColumnLayoutStyle}>
         {/* Left Panel - Search Filters + YouTube Player */}
         <div style={leftPanelStyle}>
@@ -624,7 +641,9 @@ const Songs = () => {
         </div>
 
         {/* Vertical Divider */}
-        <div style={dividerStyle}></div>
+        <div style={{ padding: "20px 0", alignSelf: "stretch" }}>
+          <div style={{ width: "1px", height: "100%", backgroundColor: "black" }} />
+        </div>
 
         {/* Right Panel - Results */}
         <div style={rightPanelStyle}>
@@ -667,7 +686,7 @@ const Songs = () => {
               <p>No songs found. {user ? "Add your first song!" : "Login to add songs."}</p>
             </div>
           ) : (
-            <div style={songsListStyle}>
+            <div style={resultsListStyle}>
               {filteredSongs.map((song) => {
                 const isMenuOpen = menuOpen === song.id
 
@@ -700,9 +719,17 @@ const Songs = () => {
                         {/* Add to Playlist */}
                         {user && (
                           <div
+                            ref={addToPlaylistRef}
                             style={menuItemStyle}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.backgroundColor = menuItemHoverStyle.backgroundColor
+                              if (addToPlaylistRef.current) {
+                                const rect = addToPlaylistRef.current.getBoundingClientRect()
+                                setSubmenuPosition({
+                                  top: rect.top,
+                                  left: rect.right + 2
+                                })
+                              }
                               setSubmenuOpen(true)
                             }}
                             onMouseLeave={(e) => {
@@ -711,8 +738,8 @@ const Songs = () => {
                           >
                             Add to Playlist <FaArrowRight style={{ marginLeft: "5px" }} />
 
-                            {submenuOpen && (
-                              <div style={submenuStyle}>
+                            {submenuOpen && ReactDOM.createPortal(
+                              <div className="playlist-submenu" style={submenuStyle}>
                                 {playlists.length === 0 ? (
                                   <div style={{ ...submenuItemStyle, cursor: "default" }}>
                                     No playlists available
@@ -737,7 +764,8 @@ const Songs = () => {
                                     </div>
                                   ))
                                 )}
-                              </div>
+                              </div>,
+                              document.body
                             )}
                           </div>
                         )}
@@ -816,6 +844,7 @@ const Songs = () => {
         />
       )}
     </div>
+    </>
   )
 }
 
