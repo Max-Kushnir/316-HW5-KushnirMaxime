@@ -27,76 +27,68 @@ const Welcome = () => {
     width: "100%",
   }
 
-  const titleStyle = {
+  const logoStyle = {
     fontSize: "48px",
-    fontWeight: "bold",
-    color: "#9C27B0",
-    marginBottom: "15px",
-    textShadow: "2px 2px 4px rgba(0,0,0,0.1)",
+    marginBottom: "10px",
   }
 
-  const subtitleStyle = {
-    fontSize: "18px",
-    color: "#666",
+  const titleStyle = {
+    fontSize: "36px",
+    fontWeight: "bold",
+    color: "#9C27B0",
     marginBottom: "40px",
-    lineHeight: "1.6",
   }
 
   const buttonContainerStyle = {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
-  }
-
-  const buttonStyle = {
-    backgroundColor: "#9C27B0",
-    color: "white",
-    border: "none",
-    padding: "14px 28px",
-    borderRadius: "4px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  }
-
-  const secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "white",
-    color: "#9C27B0",
-    border: "2px solid #9C27B0",
+    gap: "15px",
+    width: "100%",
   }
 
   const guestButtonStyle = {
-    ...buttonStyle,
     backgroundColor: "#7B1FA2",
-  }
-
-  const welcomeMessageStyle = {
-    fontSize: "16px",
-    marginBottom: "30px",
-    color: "#333",
-  }
-
-  const dividerStyle = {
-    margin: "30px 0",
-    height: "1px",
-    backgroundColor: "#ddd",
-  }
-
-  const featureListStyle = {
-    textAlign: "left",
-    margin: "30px 0",
+    color: "white",
+    border: "none",
+    padding: "0 20px",
+    height: "40px",
+    borderRadius: "4px",
     fontSize: "14px",
-    color: "#666",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
+    width: "100%",
   }
 
-  const featureItemStyle = {
-    marginBottom: "10px",
-    paddingLeft: "20px",
-    position: "relative",
+  const loginButtonStyle = {
+    backgroundColor: "#9C27B0",
+    color: "white",
+    border: "none",
+    padding: "0 20px",
+    height: "40px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
+    width: "100%",
   }
 
+  const createAccountButtonStyle = {
+    backgroundColor: "white",
+    color: "#9C27B0",
+    border: "2px solid #9C27B0",
+    padding: "0 20px",
+    height: "40px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    width: "100%",
+  }
+
+  // If user is logged in, redirect to playlists
   if (loading) {
     return (
       <div style={containerStyle}>
@@ -107,79 +99,44 @@ const Welcome = () => {
     )
   }
 
+  if (user) {
+    navigate("/playlists")
+    return null
+  }
+
+  // Guest user - show welcome screen with three buttons
   return (
     <div style={containerStyle}>
       <div style={contentStyle}>
-        <h1 style={titleStyle}>🎵 Playlister</h1>
-        <p style={subtitleStyle}>Create, manage, and share YouTube playlists with ease</p>
+        <div style={logoStyle}>🎵📋</div>
+        <h1 style={titleStyle}>The Playlister</h1>
 
-        {user ? (
-          <div>
-            <div style={welcomeMessageStyle}>
-              Welcome back, <strong>{user.username}</strong>!
-            </div>
-            <div style={buttonContainerStyle}>
-              <button
-                onClick={() => navigate("/playlists")}
-                onMouseEnter={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
-                onMouseLeave={(e) => (e.target.style.backgroundColor = "#9C27B0")}
-                style={buttonStyle}
-              >
-                View My Playlists
-              </button>
-              <button
-                onClick={() => navigate("/songs")}
-                onMouseEnter={(e) => (e.target.style.backgroundColor = "white")}
-                onMouseLeave={(e) => (e.target.style.backgroundColor = "white")}
-                style={secondaryButtonStyle}
-              >
-                Browse Song Catalog
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div style={featureListStyle}>
-              <div style={featureItemStyle}>✓ Create and organize playlists</div>
-              <div style={featureItemStyle}>✓ Add any YouTube video as a song</div>
-              <div style={featureItemStyle}>✓ Share playlists with others</div>
-              <div style={featureItemStyle}>✓ Browse and discover new songs</div>
-            </div>
-
-            <div style={dividerStyle} />
-
-            <div style={buttonContainerStyle}>
-              <button
-                onClick={() => navigate("/login")}
-                onMouseEnter={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
-                onMouseLeave={(e) => (e.target.style.backgroundColor = "#9C27B0")}
-                style={buttonStyle}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => navigate("/register")}
-                onMouseEnter={(e) => (e.target.style.borderColor = "#7B1FA2")}
-                onMouseLeave={(e) => (e.target.style.borderColor = "#9C27B0")}
-                style={secondaryButtonStyle}
-              >
-                Create Account
-              </button>
-            </div>
-
-            <div style={dividerStyle} />
-
-            <p style={{ fontSize: "14px", color: "#666", marginBottom: "15px" }}>or browse as a guest</p>
-            <button
-              onClick={() => navigate("/playlists")}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5D1B82")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
-              style={guestButtonStyle}
-            >
-              Browse Playlists
-            </button>
-          </div>
-        )}
+        <div style={buttonContainerStyle}>
+          <button
+            onClick={() => navigate("/playlists")}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#5D1B82")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
+            style={guestButtonStyle}
+          >
+            Continue as Guest
+          </button>
+          <button
+            onClick={() => navigate("/login")}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#7B1FA2")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#9C27B0")}
+            style={loginButtonStyle}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => navigate("/register")}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#F3E5F5")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "white")}
+            style={createAccountButtonStyle}
+          >
+            Create Account
+          </button>
+        </div>
       </div>
     </div>
   )

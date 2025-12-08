@@ -169,7 +169,7 @@ const Navbar = () => {
           {user && user.avatar_image ? (
             <img src={user.avatar_image} alt="Avatar" style={avatarImageStyle} />
           ) : (
-            <span>{user ? user.username.charAt(0).toUpperCase() : "👤"}</span>
+            <span>{user && user.username ? user.username.charAt(0).toUpperCase() : "👤"}</span>
           )}
         </button>
         {showMenu && (
