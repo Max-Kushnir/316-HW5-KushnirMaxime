@@ -1,859 +1,433 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { api } from '../services/api';
+"use client"
 
-function Playlists() {
-  const { user } = useAuth();
+import { useState, useEffect } from "react"
+import { useAuth } from "../context/AuthContext"
+import api from "../services/api"
+import CreatePlaylistModal from "../components/modals/CreatePlaylistModal"
+import EditPlaylistModal from "../components/modals/EditPlaylistModal"
+import PlayPlaylistModal from "../components/modals/PlayPlaylistModal"
+import DeletePlaylistModal from "../components/modals/DeletePlaylistModal"
 
-  // Search filters
-  const [filters, setFilters] = useState({
-    name: '',
-    username: '',
-    songTitle: '',
-    songArtist: '',
-    songYear: ''
-  });
+const Playlists = () => {
+  const { user } = useAuth()
+  const [playlists, setPlaylists] = useState([])
+  const [filteredPlaylists, setFilteredPlaylists] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchType, setSearchType] = useState("name")
+  const [sortBy, setSortBy] = useState("name-asc")
+  const [error, setError] = useState("")
 
-  // Sort
-  const [sortBy, setSortBy] = useState('listener_count');
-  const [sortOrder, setSortOrder] = useState('DESC');
-
-  // Playlists data
-  const [playlists, setPlaylists] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Expanded playlist
-  const [expandedId, setExpandedId] = useState(null);
-
-  // Modals
-  const [editModal, setEditModal] = useState(null); // {playlistId, name}
-  const [playModal, setPlayModal] = useState(null); // playlist object
-  const [addSongModal, setAddSongModal] = useState(null); // playlistId
-
-  // Session ID for guest listeners
-  const [sessionId] = useState(() => {
-    let sid = localStorage.getItem('guestSessionId');
-    if (!sid) {
-      sid = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('guestSessionId', sid);
-    }
-    return sid;
-  });
-
-  // Load playlists
-  const loadPlaylists = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (filters.name) params.append('name', filters.name);
-      if (filters.username) params.append('username', filters.username);
-      if (filters.songTitle) params.append('songTitle', filters.songTitle);
-      if (filters.songArtist) params.append('songArtist', filters.songArtist);
-      if (filters.songYear) params.append('songYear', filters.songYear);
-      if (sortBy) params.append('sortBy', sortBy);
-      if (sortOrder) params.append('sortOrder', sortOrder);
-
-      const data = await api.get(`/playlists?${params.toString()}`);
-      setPlaylists(data.data.playlists || []);
-    } catch (err) {
-      setError(err.message || 'Failed to load playlists');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Modals state
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showPlayModal, setShowPlayModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null)
 
   useEffect(() => {
-    loadPlaylists();
-  }, [sortBy, sortOrder]);
+    fetchPlaylists()
+  }, [])
 
-  // Handlers
-  const handleSearch = () => {
-    loadPlaylists();
-  };
+  useEffect(() => {
+    filterAndSortPlaylists()
+  }, [playlists, searchQuery, searchType, sortBy])
 
-  const handleClear = () => {
-    setFilters({
-      name: '',
-      username: '',
-      songTitle: '',
-      songArtist: '',
-      songYear: ''
-    });
-    setTimeout(() => loadPlaylists(), 0);
-  };
-
-  const handleSortChange = (e) => {
-    const value = e.target.value;
-    const sortMap = {
-      'listeners-hi': { sortBy: 'listener_count', sortOrder: 'DESC' },
-      'listeners-lo': { sortBy: 'listener_count', sortOrder: 'ASC' },
-      'name-az': { sortBy: 'name', sortOrder: 'ASC' },
-      'name-za': { sortBy: 'name', sortOrder: 'DESC' },
-      'user-az': { sortBy: 'username', sortOrder: 'ASC' },
-      'user-za': { sortBy: 'username', sortOrder: 'DESC' }
-    };
-    const { sortBy: newSort, sortOrder: newOrder } = sortMap[value];
-    setSortBy(newSort);
-    setSortOrder(newOrder);
-  };
-
-  const handleCreatePlaylist = async () => {
-    if (!user) return;
+  const fetchPlaylists = async () => {
     try {
-      await api.post('/playlists', { name: '' }); // Empty name = auto "Untitled N"
-      loadPlaylists();
+      setLoading(true)
+      setError("")
+      const result = await api.getPlaylists()
+      if (result.success) {
+        setPlaylists(result.data)
+      } else {
+        setError("Failed to load playlists")
+      }
     } catch (err) {
-      alert(err.message || 'Failed to create playlist');
+      setError("Error loading playlists")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
-  const handleEditPlaylist = (playlist) => {
-    setEditModal({ playlistId: playlist.id, name: playlist.name });
-  };
+  const filterAndSortPlaylists = () => {
+    let filtered = [...playlists]
 
-  const handleSaveEdit = async () => {
-    if (!editModal) return;
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((p) => {
+        const query = searchQuery.toLowerCase()
+        switch (searchType) {
+          case "name":
+            return p.name.toLowerCase().includes(query)
+          case "owner":
+            return p.owner?.username?.toLowerCase().includes(query)
+          case "song":
+            return p.playlist_songs?.some((ps) => ps.song?.title?.toLowerCase().includes(query))
+          default:
+            return true
+        }
+      })
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0
+      const [sortKey, sortOrder] = sortBy.split("-")
+
+      switch (sortKey) {
+        case "name":
+          compareValue = a.name.localeCompare(b.name)
+          break
+        case "listeners":
+          compareValue = (b.listener_count || 0) - (a.listener_count || 0)
+          break
+        case "owner":
+          compareValue = (a.owner?.username || "").localeCompare(b.owner?.username || "")
+          break
+        default:
+          compareValue = 0
+      }
+
+      return sortOrder === "desc" ? -compareValue : compareValue
+    })
+
+    setFilteredPlaylists(filtered)
+  }
+
+  const handleCreatePlaylist = async (name) => {
     try {
-      await api.put(`/playlists/${editModal.playlistId}`, { name: editModal.name });
-      setEditModal(null);
-      loadPlaylists();
+      const result = await api.createPlaylist(name)
+      if (result.success) {
+        setPlaylists([...playlists, result.data])
+        setShowCreateModal(false)
+      } else {
+        setError(result.message || "Failed to create playlist")
+      }
     } catch (err) {
-      alert(err.message || 'Failed to update playlist');
+      setError("Error creating playlist")
     }
-  };
+  }
 
-  const handleDeletePlaylist = async (playlistId) => {
-    if (!window.confirm('Delete this playlist?')) return;
+  const handleEditPlaylist = async (id, name) => {
     try {
-      await api.delete(`/playlists/${playlistId}`);
-      loadPlaylists();
+      const result = await api.updatePlaylist(id, name)
+      if (result.success) {
+        setPlaylists(playlists.map((p) => (p.id === id ? result.data : p)))
+        setShowEditModal(false)
+        setSelectedPlaylist(null)
+      } else {
+        setError(result.message || "Failed to update playlist")
+      }
     } catch (err) {
-      alert(err.message || 'Failed to delete playlist');
+      setError("Error updating playlist")
     }
-  };
+  }
 
-  const handleCopyPlaylist = async (playlistId) => {
-    if (!user) return;
+  const handleDeletePlaylist = async (id) => {
     try {
-      await api.post(`/playlists/${playlistId}/copy`);
-      loadPlaylists();
+      const result = await api.deletePlaylist(id)
+      if (result.success) {
+        setPlaylists(playlists.filter((p) => p.id !== id))
+        setShowDeleteModal(false)
+        setSelectedPlaylist(null)
+      } else {
+        setError(result.message || "Failed to delete playlist")
+      }
     } catch (err) {
-      alert(err.message || 'Failed to copy playlist');
+      setError("Error deleting playlist")
     }
-  };
+  }
 
-  const handlePlayPlaylist = async (playlist) => {
+  const handleCopyPlaylist = async (id) => {
     try {
-      // Record listener
-      await api.post(`/playlists/${playlist.id}/listen`, { sessionId });
-
-      // Get full playlist with songs
-      const data = await api.get(`/playlists/${playlist.id}`);
-      setPlayModal(data.data.playlist);
+      const result = await api.copyPlaylist(id)
+      if (result.success) {
+        setPlaylists([...playlists, result.data])
+      } else {
+        setError(result.message || "Failed to copy playlist")
+      }
     } catch (err) {
-      alert(err.message || 'Failed to play playlist');
+      setError("Error copying playlist")
     }
-  };
+  }
 
-  const handleAddSong = async (playlistId, songId) => {
-    if (!user) return;
-    try {
-      await api.post(`/playlists/${playlistId}/songs`, { songId: parseInt(songId) });
-      alert('Song added to playlist');
-      loadPlaylists();
-    } catch (err) {
-      alert(err.message || 'Failed to add song');
-    }
-  };
+  const containerStyle = {
+    minHeight: "calc(100vh - 50px)",
+    backgroundColor: "#FFE4F3",
+    padding: "20px",
+  }
 
-  const handleRemoveSong = async (playlistId, songId) => {
-    if (!user) return;
-    if (!window.confirm('Remove this song from playlist?')) return;
-    try {
-      await api.delete(`/playlists/${playlistId}/songs/${songId}`);
-      loadPlaylists();
-    } catch (err) {
-      alert(err.message || 'Failed to remove song');
-    }
-  };
+  const contentStyle = {
+    maxWidth: "1200px",
+    margin: "0 auto",
+  }
 
-  const handleReorderSongs = async (playlistId, songIds) => {
-    if (!user) return;
-    try {
-      await api.put(`/playlists/${playlistId}/songs/reorder`, { songIds });
-      loadPlaylists();
-    } catch (err) {
-      alert(err.message || 'Failed to reorder songs');
-    }
-  };
+  const titleStyle = {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "#9C27B0",
+    marginBottom: "20px",
+  }
 
-  const toggleExpand = (playlistId) => {
-    setExpandedId(expandedId === playlistId ? null : playlistId);
-  };
+  const searchContainerStyle = {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px",
+    flexWrap: "wrap",
+  }
 
-  const isOwner = (playlist) => user && playlist.owner_id === user.id;
+  const inputStyle = {
+    flex: 1,
+    minWidth: "200px",
+    padding: "10px",
+    fontSize: "14px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+  }
 
-  return (
-    <div style={{
-      background: '#FFE4F3',
-      minHeight: 'calc(100vh - 50px)',
-      padding: '20px'
-    }}>
-      <div style={{
-        display: 'flex',
-        gap: '20px',
-        maxWidth: '1400px',
-        margin: '0 auto'
-      }}>
+  const selectStyle = {
+    padding: "10px",
+    fontSize: "14px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    backgroundColor: "white",
+    cursor: "pointer",
+  }
 
-        {/* LEFT PANEL - SEARCH */}
-        <div style={{
-          width: '300px',
-          background: '#FFFDE7',
-          padding: '20px',
-          borderRadius: '8px',
-          height: 'fit-content'
-        }}>
-          <h2 style={{ marginTop: 0, fontSize: '20px', marginBottom: '20px' }}>Search Playlists</h2>
+  const createButtonStyle = {
+    backgroundColor: "#228B22",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "14px",
+  }
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
-              by Playlist Name
-            </label>
-            <input
-              type="text"
-              value={filters.name}
-              onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
-            />
-          </div>
+  const playlistsGridStyle = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+    gap: "20px",
+  }
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
-              by User Name
-            </label>
-            <input
-              type="text"
-              value={filters.username}
-              onChange={(e) => setFilters({ ...filters, username: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
-            />
-          </div>
+  const playlistCardStyle = {
+    backgroundColor: "#FFFDE7",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    transition: "transform 0.2s",
+  }
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
-              by Song Title
-            </label>
-            <input
-              type="text"
-              value={filters.songTitle}
-              onChange={(e) => setFilters({ ...filters, songTitle: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
-            />
-          </div>
+  const playlistNameStyle = {
+    fontSize: "18px",
+    fontWeight: "bold",
+    color: "#9C27B0",
+    marginBottom: "10px",
+  }
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
-              by Song Artist
-            </label>
-            <input
-              type="text"
-              value={filters.songArtist}
-              onChange={(e) => setFilters({ ...filters, songArtist: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
-            />
-          </div>
+  const playlistMetaStyle = {
+    fontSize: "12px",
+    color: "#666",
+    marginBottom: "5px",
+  }
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
-              by Song Year
-            </label>
-            <input
-              type="text"
-              value={filters.songYear}
-              onChange={(e) => setFilters({ ...filters, songYear: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc'
-              }}
-            />
-          </div>
+  const actionButtonsStyle = {
+    display: "flex",
+    gap: "8px",
+    marginTop: "15px",
+    flexWrap: "wrap",
+  }
 
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={handleSearch}
-              style={{
-                flex: 1,
-                padding: '8px 16px',
-                background: '#9C27B0',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Search
-            </button>
-            <button
-              onClick={handleClear}
-              style={{
-                flex: 1,
-                padding: '8px 16px',
-                background: 'white',
-                color: '#9C27B0',
-                border: '2px solid #9C27B0',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
+  const smallButtonStyle = {
+    flex: 1,
+    minWidth: "70px",
+    padding: "6px 10px",
+    fontSize: "12px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }
 
-        {/* RIGHT PANEL - RESULTS */}
-        <div style={{ flex: 1 }}>
-          <div style={{
-            background: '#FFFDE7',
-            padding: '20px',
-            borderRadius: '8px'
-          }}>
-            {/* Controls */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label style={{ fontWeight: 'bold' }}>Sort:</label>
-                <select
-                  onChange={handleSortChange}
-                  defaultValue="listeners-hi"
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc'
-                  }}
-                >
-                  <option value="listeners-hi">Listeners Hi-Lo</option>
-                  <option value="listeners-lo">Listeners Lo-Hi</option>
-                  <option value="name-az">Name A-Z</option>
-                  <option value="name-za">Name Z-A</option>
-                  <option value="user-az">User A-Z</option>
-                  <option value="user-za">User Z-A</option>
-                </select>
-              </div>
+  const playButtonStyle = {
+    ...smallButtonStyle,
+    backgroundColor: "#9C27B0",
+    color: "white",
+  }
 
-              {user && (
-                <button
-                  onClick={handleCreatePlaylist}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#9C27B0',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  + New Playlist
-                </button>
-              )}
-            </div>
+  const editButtonStyle = {
+    ...smallButtonStyle,
+    backgroundColor: "#7B1FA2",
+    color: "white",
+  }
 
-            {/* Results count */}
-            <div style={{ marginBottom: '16px', fontSize: '14px', color: '#666' }}>
-              {playlists.length} Playlist{playlists.length !== 1 ? 's' : ''}
-            </div>
+  const copyButtonStyle = {
+    ...smallButtonStyle,
+    backgroundColor: "#228B22",
+    color: "white",
+  }
 
-            {/* Loading/Error */}
-            {loading && <div>Loading...</div>}
-            {error && <div style={{ color: 'red' }}>{error}</div>}
+  const deleteButtonStyle = {
+    ...smallButtonStyle,
+    backgroundColor: "#C62828",
+    color: "white",
+  }
 
-            {/* Playlist List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {playlists.map(playlist => (
-                <div
-                  key={playlist.id}
-                  style={{
-                    background: 'white',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                    {/* Avatar */}
-                    <div style={{
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '50%',
-                      background: '#9C27B0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '20px',
-                      flexShrink: 0
-                    }}>
-                      {playlist.owner_username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+  const emptyStateStyle = {
+    textAlign: "center",
+    padding: "40px",
+    backgroundColor: "#FFFDE7",
+    borderRadius: "8px",
+    color: "#666",
+  }
 
-                    {/* Info */}
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        marginBottom: '4px',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => toggleExpand(playlist.id)}
-                      >
-                        {playlist.name}
-                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>
-                          {expandedId === playlist.id ? '∧' : '∨'}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '14px', color: '#666' }}>
-                        {playlist.owner_username}
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#9C27B0', marginTop: '4px' }}>
-                        {playlist.listener_count} Listener{playlist.listener_count !== 1 ? 's' : ''}
-                      </div>
-                    </div>
+  const errorStyle = {
+    backgroundColor: "#FFCDD2",
+    color: "#C62828",
+    padding: "12px",
+    borderRadius: "4px",
+    marginBottom: "20px",
+    fontSize: "14px",
+  }
 
-                    {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                      <button
-                        onClick={() => handlePlayPlaylist(playlist)}
-                        style={{
-                          padding: '6px 12px',
-                          background: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        Play
-                      </button>
-
-                      {user && (
-                        <button
-                          onClick={() => handleCopyPlaylist(playlist.id)}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#9C27B0',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                          }}
-                        >
-                          Copy
-                        </button>
-                      )}
-
-                      {isOwner(playlist) && (
-                        <>
-                          <button
-                            onClick={() => handleEditPlaylist(playlist)}
-                            style={{
-                              padding: '6px 12px',
-                              background: '#9C27B0',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeletePlaylist(playlist.id)}
-                            style={{
-                              padding: '6px 12px',
-                              background: '#E91E63',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Expanded Songs List */}
-                  {expandedId === playlist.id && playlist.songs && (
-                    <div style={{
-                      marginTop: '16px',
-                      paddingTop: '16px',
-                      borderTop: '1px solid #eee'
-                    }}>
-                      <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-                        Songs ({playlist.songs.length}):
-                      </div>
-                      {playlist.songs.length === 0 ? (
-                        <div style={{ color: '#999', fontSize: '14px' }}>No songs in this playlist</div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {playlist.songs.map((song, idx) => (
-                            <div
-                              key={song.id}
-                              style={{
-                                fontSize: '14px',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                              }}
-                            >
-                              <span>
-                                {idx + 1}. {song.title} by {song.artist} ({song.year})
-                              </span>
-                              {isOwner(playlist) && (
-                                <button
-                                  onClick={() => handleRemoveSong(playlist.id, song.id)}
-                                  style={{
-                                    padding: '2px 8px',
-                                    background: '#E91E63',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '3px',
-                                    cursor: 'pointer',
-                                    fontSize: '11px'
-                                  }}
-                                >
-                                  Remove
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Add Song (Owner only) */}
-                      {isOwner(playlist) && (
-                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => setAddSongModal(playlist.id)}
-                            style={{
-                              padding: '6px 12px',
-                              background: '#9C27B0',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
-                          >
-                            + Add Song (by ID)
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+  if (loading) {
+    return (
+      <div style={containerStyle}>
+        <div style={contentStyle}>
+          <p>Loading playlists...</p>
         </div>
       </div>
+    )
+  }
 
-      {/* EDIT MODAL */}
-      {editModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: '#90EE90',
-            borderRadius: '8px',
-            width: '400px',
-            maxWidth: '90%',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-          }}>
-            <div style={{
-              background: '#228B22',
-              color: 'white',
-              padding: '16px',
-              borderRadius: '8px 8px 0 0',
-              fontWeight: 'bold',
-              fontSize: '18px'
-            }}>
-              Edit Playlist
-            </div>
-            <div style={{ padding: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                Playlist Name:
-              </label>
-              <input
-                type="text"
-                value={editModal.name}
-                onChange={(e) => setEditModal({ ...editModal, name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                  fontSize: '14px'
-                }}
-              />
-              <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-                <button
-                  onClick={handleSaveEdit}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    background: '#228B22',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setEditModal(null)}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    background: '#666',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+  return (
+    <div style={containerStyle}>
+      <div style={contentStyle}>
+        <h1 style={titleStyle}>Playlists</h1>
+
+        {error && <div style={errorStyle}>{error}</div>}
+
+        <div style={searchContainerStyle}>
+          <input
+            type="text"
+            placeholder={`Search by ${searchType}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={inputStyle}
+          />
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)} style={selectStyle}>
+            <option value="name">By Name</option>
+            <option value="owner">By Owner</option>
+            <option value="song">By Song</option>
+          </select>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={selectStyle}>
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="listeners-desc">Most Listeners</option>
+            <option value="listeners-asc">Least Listeners</option>
+            <option value="owner-asc">Owner A-Z</option>
+            <option value="owner-desc">Owner Z-A</option>
+          </select>
+          {user && (
+            <button onClick={() => setShowCreateModal(true)} style={createButtonStyle}>
+              + Create
+            </button>
+          )}
         </div>
-      )}
 
-      {/* PLAY MODAL */}
-      {playModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: '#90EE90',
-            borderRadius: '8px',
-            width: '600px',
-            maxWidth: '90%',
-            maxHeight: '80vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-          }}>
-            <div style={{
-              background: '#228B22',
-              color: 'white',
-              padding: '16px',
-              borderRadius: '8px 8px 0 0',
-              fontWeight: 'bold',
-              fontSize: '18px'
-            }}>
-              Play Playlist - {playModal.name}
-            </div>
-            <div style={{ padding: '20px', overflowY: 'auto' }}>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Owner:</strong> {playModal.owner_username}
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Songs:</strong>
-              </div>
-              {playModal.songs && playModal.songs.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {playModal.songs.map((song, idx) => (
-                    <div
-                      key={song.id}
-                      style={{
-                        padding: '8px',
-                        background: 'white',
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      {idx + 1}. {song.title} by {song.artist} ({song.year})
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                        YouTube ID: {song.youtube_id}
-                      </div>
-                    </div>
-                  ))}
+        {filteredPlaylists.length === 0 ? (
+          <div style={emptyStateStyle}>
+            <p>No playlists found. {user ? "Create your first playlist!" : "Login to create playlists."}</p>
+          </div>
+        ) : (
+          <div style={playlistsGridStyle}>
+            {filteredPlaylists.map((playlist) => (
+              <div key={playlist.id} style={playlistCardStyle}>
+                <h3 style={playlistNameStyle}>{playlist.name}</h3>
+                <p style={playlistMetaStyle}>Owner: {playlist.owner?.username || "Unknown"}</p>
+                <p style={playlistMetaStyle}>Listeners: {playlist.listener_count || 0}</p>
+                <p style={playlistMetaStyle}>Songs: {playlist.playlist_songs?.length || 0}</p>
+                <div style={actionButtonsStyle}>
+                  <button
+                    onClick={() => {
+                      setSelectedPlaylist(playlist)
+                      setShowPlayModal(true)
+                    }}
+                    style={playButtonStyle}
+                  >
+                    Play
+                  </button>
+                  {user?.id === playlist.owner_id && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setSelectedPlaylist(playlist)
+                          setShowEditModal(true)
+                        }}
+                        style={editButtonStyle}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedPlaylist(playlist)
+                          setShowDeleteModal(true)
+                        }}
+                        style={deleteButtonStyle}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                  {user && user?.id !== playlist.owner_id && (
+                    <button onClick={() => handleCopyPlaylist(playlist.id)} style={copyButtonStyle}>
+                      Copy
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <div style={{ color: '#666' }}>No songs in this playlist</div>
-              )}
-              <button
-                onClick={() => setPlayModal(null)}
-                style={{
-                  marginTop: '20px',
-                  width: '100%',
-                  padding: '8px 16px',
-                  background: '#228B22',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ADD SONG MODAL */}
-      {addSongModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            background: '#90EE90',
-            borderRadius: '8px',
-            width: '400px',
-            maxWidth: '90%',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-          }}>
-            <div style={{
-              background: '#228B22',
-              color: 'white',
-              padding: '16px',
-              borderRadius: '8px 8px 0 0',
-              fontWeight: 'bold',
-              fontSize: '18px'
-            }}>
-              Add Song to Playlist
-            </div>
-            <div style={{ padding: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                Song ID:
-              </label>
-              <input
-                id="songIdInput"
-                type="number"
-                placeholder="Enter song ID"
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                  fontSize: '14px'
-                }}
-              />
-              <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-                <button
-                  onClick={() => {
-                    const songId = document.getElementById('songIdInput').value;
-                    if (songId) {
-                      handleAddSong(addSongModal, songId);
-                      setAddSongModal(null);
-                    }
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    background: '#228B22',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  Add
-                </button>
-                <button
-                  onClick={() => setAddSongModal(null)}
-                  style={{
-                    flex: 1,
-                    padding: '8px 16px',
-                    background: '#666',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  Cancel
-                </button>
               </div>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {showCreateModal && (
+        <CreatePlaylistModal onClose={() => setShowCreateModal(false)} onCreate={handleCreatePlaylist} />
+      )}
+      {showEditModal && selectedPlaylist && (
+        <EditPlaylistModal
+          playlist={selectedPlaylist}
+          onClose={() => {
+            setShowEditModal(false)
+            setSelectedPlaylist(null)
+          }}
+          onSave={handleEditPlaylist}
+        />
+      )}
+      {showPlayModal && selectedPlaylist && (
+        <PlayPlaylistModal
+          playlist={selectedPlaylist}
+          onClose={() => {
+            setShowPlayModal(false)
+            setSelectedPlaylist(null)
+          }}
+        />
+      )}
+      {showDeleteModal && selectedPlaylist && (
+        <DeletePlaylistModal
+          playlist={selectedPlaylist}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setSelectedPlaylist(null)
+          }}
+          onDelete={handleDeletePlaylist}
+        />
       )}
     </div>
-  );
+  )
 }
 
-export default Playlists;
+export default Playlists

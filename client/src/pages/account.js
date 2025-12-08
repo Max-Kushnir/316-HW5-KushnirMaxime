@@ -1,24 +1,29 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 
-const Register = () => {
-  const [email, setEmail] = useState("")
-  const [username, setUsername] = useState("")
+const Account = () => {
+  const { user, updateProfile } = useAuth()
+  const navigate = useNavigate()
+  const [username, setUsername] = useState(user?.username || "")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [avatar, setAvatar] = useState(null)
-  const [avatarPreview, setAvatarPreview] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar || null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const { register } = useAuth()
-  const navigate = useNavigate()
+  const [success, setSuccess] = useState("")
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image must be less than 5MB")
+        return
+      }
+
       const reader = new FileReader()
       reader.onload = (event) => {
         const base64String = event.target.result
@@ -32,23 +37,33 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
+    setSuccess("")
 
-    if (password !== confirmPassword) {
+    if (!username.trim()) {
+      setError("Username cannot be empty")
+      return
+    }
+
+    if (password && password !== confirmPassword) {
       setError("Passwords do not match")
       return
     }
 
-    if (password.length < 8) {
+    if (password && password.length < 8) {
       setError("Password must be at least 8 characters long")
       return
     }
 
     setLoading(true)
-    const result = await register(email, username, password, avatar)
+    const result = await updateProfile(username, password || undefined, avatar)
     if (result.success) {
-      navigate("/playlists")
+      setSuccess("Profile updated successfully!")
+      setPassword("")
+      setConfirmPassword("")
+      setAvatar(null)
+      setTimeout(() => navigate("/playlists"), 2000)
     } else {
-      setError(result.message || "Registration failed")
+      setError(result.message || "Update failed")
     }
     setLoading(false)
   }
@@ -110,11 +125,26 @@ const Register = () => {
     borderRadius: "4px",
     cursor: "pointer",
     marginTop: "10px",
+    transition: "background-color 0.2s",
+  }
+
+  const cancelButtonStyle = {
+    ...submitButtonStyle,
+    backgroundColor: "#7B1FA2",
   }
 
   const errorStyle = {
     backgroundColor: "#FFCDD2",
     color: "#C62828",
+    padding: "12px",
+    borderRadius: "4px",
+    marginBottom: "20px",
+    fontSize: "14px",
+  }
+
+  const successStyle = {
+    backgroundColor: "#C8E6C9",
+    color: "#2E7D32",
     padding: "12px",
     borderRadius: "4px",
     marginBottom: "20px",
@@ -130,32 +160,41 @@ const Register = () => {
     border: "2px solid #9C27B0",
   }
 
-  const linkStyle = {
-    marginTop: "15px",
-    textAlign: "center",
+  const userEmailStyle = {
     fontSize: "14px",
-    color: "#333",
+    color: "#666",
+    marginBottom: "20px",
+    padding: "10px",
+    backgroundColor: "#f5f5f5",
+    borderRadius: "4px",
   }
 
-  const linkAnchorStyle = {
-    color: "#9C27B0",
-    textDecoration: "none",
-    fontWeight: "bold",
+  const helperTextStyle = {
+    fontSize: "12px",
+    color: "#666",
+    marginTop: "4px",
+  }
+
+  const dividerStyle = {
+    height: "1px",
+    backgroundColor: "#ddd",
+    margin: "20px 0",
   }
 
   return (
     <div style={containerStyle}>
       <div style={formContainerStyle}>
-        <h1 style={titleStyle}>Register</h1>
+        <h1 style={titleStyle}>Edit Account</h1>
+
+        <div style={userEmailStyle}>
+          <strong>Email:</strong> {user?.email}
+          <div style={helperTextStyle}>(email cannot be changed)</div>
+        </div>
 
         {error && <div style={errorStyle}>{error}</div>}
+        {success && <div style={successStyle}>{success}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
-          </div>
-
           <div style={formGroupStyle}>
             <label style={labelStyle}>Username</label>
             <input
@@ -167,15 +206,18 @@ const Register = () => {
             />
           </div>
 
+          <div style={dividerStyle} />
+
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Password</label>
+            <label style={labelStyle}>New Password (optional)</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              placeholder="Leave blank to keep current password"
               style={inputStyle}
             />
+            <div style={helperTextStyle}>Must be at least 8 characters</div>
           </div>
 
           <div style={formGroupStyle}>
@@ -184,33 +226,34 @@ const Register = () => {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
+              placeholder="Leave blank to keep current password"
               style={inputStyle}
             />
           </div>
 
+          <div style={dividerStyle} />
+
           <div style={formGroupStyle}>
             <label style={labelStyle}>Avatar Image</label>
             <input type="file" accept="image/*" onChange={handleAvatarChange} style={inputStyle} />
+            <div style={helperTextStyle}>Max 5MB</div>
             {avatarPreview && (
               <img src={avatarPreview || "/placeholder.svg"} alt="Avatar preview" style={avatarPreviewStyle} />
             )}
           </div>
 
-          <button type="submit" disabled={loading} style={submitButtonStyle}>
-            {loading ? "Creating..." : "Register"}
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button type="submit" disabled={loading} style={submitButtonStyle}>
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
+            <button type="button" onClick={() => navigate("/playlists")} style={cancelButtonStyle}>
+              Cancel
+            </button>
+          </div>
         </form>
-
-        <div style={linkStyle}>
-          Already have an account?{" "}
-          <Link to="/login" style={linkAnchorStyle}>
-            Login here
-          </Link>
-        </div>
       </div>
     </div>
   )
 }
 
-export default Register
+export default Account

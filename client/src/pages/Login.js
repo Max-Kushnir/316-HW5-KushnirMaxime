@@ -1,200 +1,150 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+"use client"
 
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { login } = useAuth();
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
+
+const Login = () => {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
+    setError("")
 
-    try {
-      await login(email, password);
-      navigate('/playlists');
-    } catch (err) {
-      setError(err.message || 'Invalid email or password');
-    } finally {
-      setLoading(false);
+    const result = await login(email, password)
+    if (result.success) {
+      navigate("/playlists")
+    } else {
+      setError(result.message || "Login failed")
     }
-  };
+    setLoading(false)
+  }
 
-  const clearEmail = () => setEmail('');
-  const clearPassword = () => setPassword('');
+  const containerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "calc(100vh - 50px)",
+    backgroundColor: "#FFE4F3",
+    padding: "20px",
+  }
+
+  const formContainerStyle = {
+    backgroundColor: "#FFFDE7",
+    padding: "40px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    maxWidth: "400px",
+    width: "100%",
+  }
+
+  const titleStyle = {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "#9C27B0",
+    marginBottom: "30px",
+    textAlign: "center",
+  }
+
+  const formGroupStyle = {
+    marginBottom: "20px",
+    display: "flex",
+    flexDirection: "column",
+  }
+
+  const labelStyle = {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: "8px",
+  }
+
+  const inputStyle = {
+    padding: "12px",
+    fontSize: "14px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontFamily: "inherit",
+  }
+
+  const submitButtonStyle = {
+    backgroundColor: "#9C27B0",
+    color: "white",
+    border: "none",
+    padding: "12px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    borderRadius: "4px",
+    cursor: "pointer",
+    marginTop: "10px",
+  }
+
+  const errorStyle = {
+    backgroundColor: "#FFCDD2",
+    color: "#C62828",
+    padding: "12px",
+    borderRadius: "4px",
+    marginBottom: "20px",
+    fontSize: "14px",
+  }
+
+  const linkStyle = {
+    marginTop: "15px",
+    textAlign: "center",
+    fontSize: "14px",
+    color: "#333",
+  }
+
+  const linkAnchorStyle = {
+    color: "#9C27B0",
+    textDecoration: "none",
+    fontWeight: "bold",
+  }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formCard}>
-        <h1 style={styles.title}>Sign In</h1>
+    <div style={containerStyle}>
+      <div style={formContainerStyle}>
+        <h1 style={titleStyle}>Login</h1>
+
+        {error && <div style={errorStyle}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Email</label>
-            <div style={styles.inputWrapper}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={styles.input}
-                placeholder="Enter your email"
-              />
-              {email && (
-                <button
-                  type="button"
-                  onClick={clearEmail}
-                  style={styles.clearButton}
-                >
-                  ×
-                </button>
-              )}
-            </div>
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Password</label>
-            <div style={styles.inputWrapper}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                style={styles.input}
-                placeholder="Enter your password"
-              />
-              {password && (
-                <button
-                  type="button"
-                  onClick={clearPassword}
-                  style={styles.clearButton}
-                >
-                  ×
-                </button>
-              )}
-            </div>
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={inputStyle}
+            />
           </div>
 
-          {error && <div style={styles.error}>{error}</div>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={styles.submitButton}
-          >
-            {loading ? 'SIGNING IN...' : 'SIGN IN'}
+          <button type="submit" disabled={loading} style={submitButtonStyle}>
+            {loading ? "Loading..." : "Login"}
           </button>
         </form>
 
-        <div style={styles.footer}>
-          Don't have an account?{' '}
-          <Link to="/register" style={styles.link}>
-            Sign Up
+        <div style={linkStyle}>
+          Don't have an account?{" "}
+          <Link to="/register" style={linkAnchorStyle}>
+            Register here
           </Link>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 'calc(100vh - 80px)',
-    padding: '20px',
-  },
-  formCard: {
-    background: '#FFFDE7',
-    padding: '40px',
-    borderRadius: '8px',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    width: '100%',
-    maxWidth: '400px',
-  },
-  title: {
-    color: '#333',
-    fontSize: '28px',
-    marginBottom: '30px',
-    textAlign: 'center',
-  },
-  inputGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    color: '#333',
-    fontSize: '14px',
-    marginBottom: '8px',
-    fontWeight: '500',
-  },
-  inputWrapper: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  input: {
-    width: '100%',
-    padding: '12px',
-    paddingRight: '40px',
-    fontSize: '16px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-    outline: 'none',
-    boxSizing: 'border-box',
-  },
-  clearButton: {
-    position: 'absolute',
-    right: '10px',
-    background: 'transparent',
-    border: 'none',
-    fontSize: '24px',
-    color: '#999',
-    cursor: 'pointer',
-    padding: '0',
-    width: '24px',
-    height: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  error: {
-    background: '#ffebee',
-    color: '#c62828',
-    padding: '12px',
-    borderRadius: '4px',
-    marginBottom: '20px',
-    fontSize: '14px',
-  },
-  submitButton: {
-    width: '100%',
-    padding: '14px',
-    background: '#9C27B0',
-    color: '#333',
-    fontSize: '16px',
-    fontWeight: '600',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    transition: 'background 0.2s',
-  },
-  footer: {
-    marginTop: '20px',
-    textAlign: 'center',
-    color: '#333',
-    fontSize: '14px',
-  },
-  link: {
-    color: '#9C27B0',
-    textDecoration: 'none',
-    fontWeight: '600',
-  },
-};
-
-export default Login;
+export default Login
