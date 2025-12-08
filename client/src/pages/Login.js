@@ -26,6 +26,44 @@ const Login = () => {
     setLoading(false)
   }
 
+  // InputWithClear component for fields with clear button
+  const InputWithClear = ({ value, onChange, type = "text", ...props }) => (
+    <div style={{ position: "relative" }}>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        style={{
+          ...inputStyle,
+          paddingRight: value ? "35px" : "12px",
+        }}
+        {...props}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange({ target: { value: "" } })}
+          style={{
+            position: "absolute",
+            right: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#999",
+            fontSize: "18px",
+            padding: "0",
+            lineHeight: "1",
+          }}
+          aria-label="Clear"
+        >
+          ⊗
+        </button>
+      )}
+    </div>
+  )
+
   const containerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -60,29 +98,37 @@ const Login = () => {
 
   const labelStyle = {
     fontSize: "14px",
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "normal",
+    color: "#666",
     marginBottom: "8px",
   }
 
   const inputStyle = {
-    padding: "12px",
+    height: "44px",
+    padding: "0 12px",
     fontSize: "14px",
-    border: "1px solid #ddd",
+    border: "1px solid #999",
     borderRadius: "4px",
     fontFamily: "inherit",
+    backgroundColor: "white",
+    width: "100%",
+    boxSizing: "border-box",
+    outline: "none",
+    transition: "border 0.2s",
   }
 
   const submitButtonStyle = {
-    backgroundColor: "#9C27B0",
+    backgroundColor: "#333333",
     color: "white",
     border: "none",
-    padding: "12px",
-    fontSize: "16px",
-    fontWeight: "bold",
+    height: "40px",
+    padding: "0 20px",
+    fontSize: "14px",
+    fontWeight: "500",
     borderRadius: "4px",
     cursor: "pointer",
     marginTop: "10px",
+    width: "100%",
   }
 
   const errorStyle = {
@@ -108,42 +154,49 @@ const Login = () => {
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <h1 style={titleStyle}>Login</h1>
+    <>
+      <style>
+        {`
+          input:focus {
+            border: 2px solid #9C27B0 !important;
+          }
+          input::placeholder {
+            color: #999999;
+            font-style: italic;
+          }
+        `}
+      </style>
+      <div style={containerStyle}>
+        <div style={formContainerStyle}>
+          <h1 style={titleStyle}>Login</h1>
 
-        {error && <div style={errorStyle}>{error}</div>}
+          {error && <div style={errorStyle}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
           <div style={formGroupStyle}>
             <label style={labelStyle}>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
+            <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={inputStyle}
-            />
+            <InputWithClear type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
 
           <button type="submit" disabled={loading} style={submitButtonStyle}>
-            {loading ? "Loading..." : "Login"}
+            {loading ? "Loading..." : "SIGN IN"}
           </button>
         </form>
 
         <div style={linkStyle}>
           Don't have an account?{" "}
           <Link to="/register" style={linkAnchorStyle}>
-            Register here
+            Sign Up
           </Link>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 
