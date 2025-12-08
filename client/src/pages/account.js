@@ -244,6 +244,13 @@ const Account = () => {
     marginTop: "4px",
   }
 
+  const copyrightStyle = {
+    fontSize: "12px",
+    color: "black",
+    textAlign: "center",
+    marginTop: "20px",
+  }
+
   return (
     <>
       <style>
@@ -334,6 +341,7 @@ const Account = () => {
               </button>
             </div>
           </form>
+          <div style={copyrightStyle}>Copyright @ Playlister 2025</div>
         </div>
       </div>
     </>

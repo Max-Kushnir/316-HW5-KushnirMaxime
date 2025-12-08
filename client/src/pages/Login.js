@@ -68,8 +68,17 @@ const Login = () => {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     height: "100%",
+    padding: "20px",
+    boxSizing: "border-box",
+  }
+
+  const contentWrapperStyle = {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   }
 
   const formContainerStyle = {
@@ -81,7 +90,7 @@ const Login = () => {
   const titleStyle = {
     fontSize: "28px",
     fontWeight: "bold",
-    color: "#9C27B0",
+    color: "#333333",
     marginBottom: "30px",
     textAlign: "center",
   }
@@ -144,9 +153,16 @@ const Login = () => {
   }
 
   const linkAnchorStyle = {
-    color: "#9C27B0",
+    color: "red",
     textDecoration: "none",
     fontWeight: "bold",
+  }
+
+  const copyrightStyle = {
+    fontSize: "12px",
+    color: "black",
+    textAlign: "center",
+    marginTop: "20px",
   }
 
   return (
@@ -163,34 +179,37 @@ const Login = () => {
         `}
       </style>
       <div style={containerStyle}>
-        <div style={formContainerStyle}>
-          <h1 style={titleStyle}>Login</h1>
+        <div style={contentWrapperStyle}>
+          <div style={formContainerStyle}>
+            <h1 style={titleStyle}>Sign In</h1>
 
-          {error && <div style={errorStyle}>{error}</div>}
+            {error && <div style={errorStyle}>{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Email</label>
-            <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
+            <form onSubmit={handleSubmit}>
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Email</label>
+                <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
+              </div>
+
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Password</label>
+                <InputWithClear type="password" value={password} onChange={(e) => setPassword(e.target.value)} required inputStyle={inputStyle} />
+              </div>
+
+              <button type="submit" disabled={loading} style={submitButtonStyle}>
+                {loading ? "Loading..." : "SIGN IN"}
+              </button>
+            </form>
+
+            <div style={linkStyle}>
+              Don't have an account?{" "}
+              <Link to="/register" style={linkAnchorStyle}>
+                Sign Up
+              </Link>
+            </div>
           </div>
-
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Password</label>
-            <InputWithClear type="password" value={password} onChange={(e) => setPassword(e.target.value)} required inputStyle={inputStyle} />
-          </div>
-
-          <button type="submit" disabled={loading} style={submitButtonStyle}>
-            {loading ? "Loading..." : "SIGN IN"}
-          </button>
-        </form>
-
-        <div style={linkStyle}>
-          Don't have an account?{" "}
-          <Link to="/register" style={linkAnchorStyle}>
-            Sign Up
-          </Link>
         </div>
-      </div>
+        <div style={copyrightStyle}>Copyright @ Playlister 2025</div>
       </div>
     </>
   )

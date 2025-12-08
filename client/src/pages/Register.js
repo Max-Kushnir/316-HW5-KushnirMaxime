@@ -104,15 +104,22 @@ const Register = () => {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     height: "100%",
     textAlign: "center",
     padding: "20px",
     boxSizing: "border-box",
   }
 
+  const contentWrapperStyle = {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  }
+
   const formContainerStyle = {
-    maxWidth: "400px",
+    maxWidth: "600px",
     width: "100%",
     textAlign: "left",
   }
@@ -120,9 +127,37 @@ const Register = () => {
   const titleStyle = {
     fontSize: "28px",
     fontWeight: "bold",
-    color: "#9C27B0",
+    color: "#333333",
     marginBottom: "30px",
     textAlign: "center",
+  }
+
+  const lockEmojiStyle = {
+    fontSize: "32px",
+    textAlign: "center",
+    marginBottom: "10px",
+  }
+
+  const formRowStyle = {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    gap: "20px",
+  }
+
+  const avatarColumnStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: "25px",
+  }
+
+  const inputsColumnStyle = {
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: "400px",
+    width: "100%",
   }
 
   const formGroupStyle = {
@@ -200,8 +235,7 @@ const Register = () => {
     backgroundColor: "#333333",
     color: "white",
     border: "none",
-    height: "40px",
-    padding: "0 20px",
+    padding: "6px 14px",
     fontSize: "14px",
     fontWeight: "500",
     borderRadius: "4px",
@@ -210,15 +244,22 @@ const Register = () => {
 
   const linkStyle = {
     marginTop: "15px",
-    textAlign: "center",
+    textAlign: "right",
     fontSize: "14px",
-    color: "#333",
+    color: "red",
   }
 
   const linkAnchorStyle = {
-    color: "#9C27B0",
+    color: "red",
     textDecoration: "none",
     fontWeight: "bold",
+  }
+
+  const copyrightStyle = {
+    marginTop: "20px",
+    textAlign: "center",
+    fontSize: "12px",
+    color: "black",
   }
 
   return (
@@ -235,76 +276,82 @@ const Register = () => {
         `}
       </style>
       <div style={containerStyle}>
-        <div style={formContainerStyle}>
-          <h1 style={titleStyle}>Create Account</h1>
+        <div style={contentWrapperStyle}>
+          <div style={formContainerStyle}>
+            <div style={lockEmojiStyle}>🔒</div>
+            <h1 style={titleStyle}>Create Account</h1>
 
-          {error && <div style={errorStyle}>{error}</div>}
+            {error && <div style={errorStyle}>{error}</div>}
 
-          <form onSubmit={handleSubmit}>
-            {/* Avatar Image - FIRST per Section 5.2 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Avatar Image</label>
-              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar preview" style={avatarPreviewStyle} />
-                ) : (
-                  <div style={placeholderAvatarStyle}>👤</div>
-                )}
-                <label style={selectButtonStyle}>
-                  Select
-                  <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
-                </label>
+            <form onSubmit={handleSubmit}>
+              <div style={formRowStyle}>
+                {/* Avatar column - positioned to left of inputs */}
+                <div style={avatarColumnStyle}>
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar preview" style={avatarPreviewStyle} />
+                  ) : (
+                    <div style={placeholderAvatarStyle}>👤</div>
+                  )}
+                  <label style={{ ...selectButtonStyle, marginTop: "10px" }}>
+                    Select
+                    <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
+                  </label>
+                </div>
+
+                {/* Inputs column */}
+                <div style={inputsColumnStyle}>
+                  {/* User Name */}
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>User Name</label>
+                    <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
+                  </div>
+
+                  {/* Email */}
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>Email</label>
+                    <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
+                  </div>
+
+                  {/* Password */}
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>Password</label>
+                    <InputWithClear
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      inputStyle={inputStyle}
+                    />
+                  </div>
+
+                  {/* Password Confirm */}
+                  <div style={formGroupStyle}>
+                    <label style={labelStyle}>Password Confirm</label>
+                    <InputWithClear
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      inputStyle={inputStyle}
+                    />
+                  </div>
+
+                  <button type="submit" disabled={!isFormValid || loading} style={submitButtonStyle}>
+                    {loading ? "Creating..." : "Create Account"}
+                  </button>
+                </div>
               </div>
+            </form>
+
+            <div style={linkStyle}>
+              Already have an account?{" "}
+              <Link to="/login" style={linkAnchorStyle}>
+                Sign In
+              </Link>
             </div>
-
-            {/* User Name - SECOND per Section 5.2 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>User Name</label>
-              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
-            </div>
-
-            {/* Email - THIRD per Section 5.2 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Email</label>
-              <InputWithClear type="email" value={email} onChange={(e) => setEmail(e.target.value)} required inputStyle={inputStyle} />
-            </div>
-
-            {/* Password - FOURTH per Section 5.2 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Password</label>
-              <InputWithClear
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                inputStyle={inputStyle}
-              />
-            </div>
-
-            {/* Password Confirm - FIFTH per Section 5.2 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Password Confirm</label>
-              <InputWithClear
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                inputStyle={inputStyle}
-              />
-            </div>
-
-            <button type="submit" disabled={!isFormValid || loading} style={submitButtonStyle}>
-              {loading ? "Creating..." : "Create Account"}
-            </button>
-          </form>
-
-          <div style={linkStyle}>
-            Already have an account?{" "}
-            <Link to="/login" style={linkAnchorStyle}>
-              Sign In
-            </Link>
           </div>
         </div>
+        <div style={copyrightStyle}>Copyright @ Playlister 2025</div>
       </div>
     </>
   )
