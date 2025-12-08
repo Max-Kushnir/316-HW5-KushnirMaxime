@@ -85,6 +85,7 @@ const Login = () => {
     padding: "40px",
     maxWidth: "400px",
     width: "100%",
+    textAlign: "center",
   }
 
   const titleStyle = {

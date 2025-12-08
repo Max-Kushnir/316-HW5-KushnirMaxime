@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import { FaLock, FaUser } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 
 // InputWithClear component OUTSIDE the main component to prevent re-creation on render
@@ -278,7 +279,7 @@ const Register = () => {
       <div style={containerStyle}>
         <div style={contentWrapperStyle}>
           <div style={formContainerStyle}>
-            <div style={lockEmojiStyle}>🔒</div>
+            <div style={lockEmojiStyle}><FaLock style={{ color: "black", fontSize: "32px" }} /></div>
             <h1 style={titleStyle}>Create Account</h1>
 
             {error && <div style={errorStyle}>{error}</div>}
@@ -290,7 +291,7 @@ const Register = () => {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar preview" style={avatarPreviewStyle} />
                   ) : (
-                    <div style={placeholderAvatarStyle}>👤</div>
+                    <div style={placeholderAvatarStyle}><FaUser style={{ color: "#999", fontSize: "40px" }} /></div>
                   )}
                   <label style={{ ...selectButtonStyle, marginTop: "10px" }}>
                     Select

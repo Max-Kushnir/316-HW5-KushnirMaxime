@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import { FaHome, FaUser } from "react-icons/fa"
 
 const Navbar = ({ hideNavButtons = false }) => {
   const { user, logout } = useAuth()
@@ -135,7 +136,7 @@ const Navbar = ({ hideNavButtons = false }) => {
           onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           style={homeButtonStyle}
         >
-          🏠
+          <FaHome style={{ color: "black", fontSize: "18px" }} />
         </button>
         {!hideNavButtons && (
           <>
@@ -171,7 +172,7 @@ const Navbar = ({ hideNavButtons = false }) => {
           {user && user.avatar_image ? (
             <img src={user.avatar_image} alt="Avatar" style={avatarImageStyle} />
           ) : (
-            <span>{user && user.username ? user.username.charAt(0).toUpperCase() : "👤"}</span>
+            <span>{user && user.username ? user.username.charAt(0).toUpperCase() : <FaUser style={{ color: "black", fontSize: "18px" }} />}</span>
           )}
         </button>
         {showMenu && (

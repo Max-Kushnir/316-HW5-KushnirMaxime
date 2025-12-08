@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { FaSearch, FaArrowRight } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 import api from "../services/api"
 import CreateSongModal from "../components/modals/CreateSongModal"
@@ -590,7 +591,7 @@ const Songs = () => {
           {/* Search and Clear Buttons */}
           <div style={buttonRowStyle}>
             <button onClick={handleSearch} style={searchButtonStyle}>
-              🔍 Search
+              <FaSearch style={{ marginRight: "6px" }} /> Search
             </button>
             <button onClick={handleClear} style={clearFiltersButtonStyle}>
               Clear
@@ -698,7 +699,7 @@ const Songs = () => {
                               e.currentTarget.style.backgroundColor = ""
                             }}
                           >
-                            Add to Playlist →
+                            Add to Playlist <FaArrowRight style={{ marginLeft: "5px" }} />
 
                             {submenuOpen && (
                               <div style={submenuStyle}>

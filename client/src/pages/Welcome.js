@@ -1,6 +1,7 @@
 "use client"
 
 import { useNavigate } from "react-router-dom"
+import { FaMusic, FaListUl } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 
 const Welcome = () => {
@@ -17,8 +18,15 @@ const Welcome = () => {
   }
 
   const logoStyle = {
-    fontSize: "48px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
     marginBottom: "10px",
+  }
+
+  const iconStyle = {
+    color: "black",
+    fontSize: "48px",
   }
 
   const titleStyle = {
@@ -67,7 +75,10 @@ const Welcome = () => {
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>The Playlister</h1>
-      <div style={logoStyle}>🎵📋</div>
+      <div style={logoStyle}>
+        <FaMusic style={iconStyle} />
+        <FaListUl style={iconStyle} />
+      </div>
 
       <div style={buttonContainerStyle}>
         <button

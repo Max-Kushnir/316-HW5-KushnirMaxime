@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { FaUser } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 
 // InputWithClear component OUTSIDE the main component to prevent re-creation on render
@@ -114,11 +115,18 @@ const Account = () => {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     height: "100%",
     textAlign: "center",
     padding: "20px",
     boxSizing: "border-box",
+  }
+
+  const contentWrapperStyle = {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   }
 
   const formContainerStyle = {
@@ -265,84 +273,86 @@ const Account = () => {
         `}
       </style>
       <div style={containerStyle}>
-        <div style={formContainerStyle}>
-          <h1 style={titleStyle}>Edit Account</h1>
+        <div style={contentWrapperStyle}>
+          <div style={formContainerStyle}>
+            <h1 style={titleStyle}>Edit Account</h1>
 
-          {error && <div style={errorStyle}>{error}</div>}
-          {success && <div style={successStyle}>{success}</div>}
+            {error && <div style={errorStyle}>{error}</div>}
+            {success && <div style={successStyle}>{success}</div>}
 
-          <form onSubmit={handleSubmit}>
-            {/* Avatar Image - FIRST per Section 5.3 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Avatar Image</label>
-              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar preview" style={avatarPreviewStyle} />
-                ) : (
-                  <div style={placeholderAvatarStyle}>👤</div>
-                )}
-                <label style={selectButtonStyle}>
-                  Select
-                  <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
-                </label>
+            <form onSubmit={handleSubmit}>
+              {/* Avatar Image - FIRST per Section 5.3 */}
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Avatar Image</label>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar preview" style={avatarPreviewStyle} />
+                  ) : (
+                    <div style={placeholderAvatarStyle}><FaUser style={{ color: "#999", fontSize: "40px" }} /></div>
+                  )}
+                  <label style={selectButtonStyle}>
+                    Select
+                    <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} />
+                  </label>
+                </div>
               </div>
-            </div>
 
-            {/* User Name - SECOND per Section 5.3 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>User Name</label>
-              <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
-            </div>
+              {/* User Name - SECOND per Section 5.3 */}
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>User Name</label>
+                <InputWithClear type="text" value={username} onChange={(e) => setUsername(e.target.value)} required inputStyle={inputStyle} />
+              </div>
 
-            {/* Email - THIRD per Section 5.3 (read-only/disabled) */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Email</label>
-              <InputWithClear
-                type="email"
-                value={user?.email || ""}
-                onChange={() => {}}
-                disabled={true}
-                inputStyle={inputStyle}
-              />
-              <div style={helperTextStyle}>(email cannot be changed)</div>
-            </div>
+              {/* Email - THIRD per Section 5.3 (read-only/disabled) */}
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Email</label>
+                <InputWithClear
+                  type="email"
+                  value={user?.email || ""}
+                  onChange={() => {}}
+                  disabled={true}
+                  inputStyle={inputStyle}
+                />
+                <div style={helperTextStyle}>(email cannot be changed)</div>
+              </div>
 
-            {/* New Password - FOURTH per Section 5.3 (optional) */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>New Password</label>
-              <InputWithClear
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Leave blank to keep current password"
-                inputStyle={inputStyle}
-              />
-              <div style={helperTextStyle}>(optional)</div>
-            </div>
+              {/* New Password - FOURTH per Section 5.3 (optional) */}
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>New Password</label>
+                <InputWithClear
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Leave blank to keep current password"
+                  inputStyle={inputStyle}
+                />
+                <div style={helperTextStyle}>(optional)</div>
+              </div>
 
-            {/* Confirm Password - FIFTH per Section 5.3 */}
-            <div style={formGroupStyle}>
-              <label style={labelStyle}>Confirm Password</label>
-              <InputWithClear
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Leave blank to keep current password"
-                inputStyle={inputStyle}
-              />
-            </div>
+              {/* Confirm Password - FIFTH per Section 5.3 */}
+              <div style={formGroupStyle}>
+                <label style={labelStyle}>Confirm Password</label>
+                <InputWithClear
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Leave blank to keep current password"
+                  inputStyle={inputStyle}
+                />
+              </div>
 
-            <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-              <button type="button" onClick={() => navigate("/playlists")} style={cancelButtonStyle}>
-                Cancel
-              </button>
-              <button type="submit" disabled={loading} style={completeButtonStyle}>
-                {loading ? "Saving..." : "Complete"}
-              </button>
-            </div>
-          </form>
-          <div style={copyrightStyle}>Copyright @ Playlister 2025</div>
+              <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                <button type="button" onClick={() => navigate("/playlists")} style={cancelButtonStyle}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={loading} style={completeButtonStyle}>
+                  {loading ? "Saving..." : "Complete"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+        <div style={copyrightStyle}>Copyright @ Playlister 2025</div>
       </div>
     </>
   )

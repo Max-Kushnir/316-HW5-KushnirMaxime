@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { FaSearch } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 import api from "../services/api"
 import CreatePlaylistModal from "../components/modals/CreatePlaylistModal"
@@ -591,7 +592,7 @@ const Playlists = () => {
           {/* Search and Clear Buttons */}
           <div style={buttonRowStyle}>
             <button onClick={handleSearch} style={searchButtonStyle}>
-              🔍 Search
+              <FaSearch style={{ marginRight: "6px" }} /> Search
             </button>
             <button onClick={handleClear} style={clearFiltersButtonStyle}>
               Clear
