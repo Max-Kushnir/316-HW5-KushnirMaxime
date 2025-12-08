@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Welcome from './pages/Welcome';
 import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Welcome />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<div>Register Page (TODO)</div>} />
+              <Route path="/register" element={<Register />} />
               <Route path="/playlists" element={<div>Playlists Page (TODO)</div>} />
               <Route path="/songs" element={<div>Songs Page (TODO)</div>} />
             </Routes>
