@@ -222,7 +222,7 @@ const EditSongModal = ({ song, onClose, onSave }) => {
               <button type="button" onClick={onClose} style={cancelButtonStyle} disabled={loading}>
                 Cancel
               </button>
-              <button type="submit" disabled={loading} style={submitButtonStyle}>
+              <button type="submit" disabled={loading || !title.trim() || !artist.trim() || !year.toString().trim() || !youtubeId.trim()} style={submitButtonStyle}>
                 {loading ? "Completing..." : "Complete"}
               </button>
             </div>

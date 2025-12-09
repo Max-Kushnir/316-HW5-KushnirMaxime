@@ -190,11 +190,20 @@ const copy = async (songId, newOwnerId) => {
   }
 };
 
+/**
+ * Increment listen count for a song
+ * @param {Number} songId - Song ID
+ */
+const incrementListenCount = async (songId) => {
+  await Song.increment('listen_count', { where: { id: songId } });
+};
+
 module.exports = {
   findAll,
   findById,
   create,
   update,
   deleteById,
-  copy
+  copy,
+  incrementListenCount
 };

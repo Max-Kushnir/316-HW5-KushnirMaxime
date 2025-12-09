@@ -146,11 +146,26 @@ const copySong = async (req, res, next) => {
   }
 };
 
+/**
+ * Record a song listen
+ * POST /api/songs/:id/listen
+ */
+const recordListen = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await songService.incrementListenCount(parseInt(id));
+    sendSuccess(res, 200, null, 'Listen recorded');
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllSongs,
   getSong,
   createSong,
   updateSong,
   deleteSong,
-  copySong
+  copySong,
+  recordListen
 };

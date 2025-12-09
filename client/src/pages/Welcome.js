@@ -20,13 +20,29 @@ const Welcome = () => {
   const logoStyle = {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    justifyContent: "center",
     marginBottom: "10px",
+    position: "relative",
   }
 
-  const iconStyle = {
+  const combinedIconStyle = {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }
+
+  const musicNoteStyle = {
     color: "black",
     fontSize: "48px",
+  }
+
+  const listOverlayStyle = {
+    color: "black",
+    fontSize: "20px",
+    position: "absolute",
+    right: "-8px",
+    bottom: "0px",
   }
 
   const titleStyle = {
@@ -76,8 +92,10 @@ const Welcome = () => {
     <div style={containerStyle}>
       <h1 style={titleStyle}>The Playlister</h1>
       <div style={logoStyle}>
-        <FaMusic style={iconStyle} />
-        <FaListUl style={iconStyle} />
+        <div style={combinedIconStyle}>
+          <FaMusic style={musicNoteStyle} />
+          <FaListUl style={listOverlayStyle} />
+        </div>
       </div>
 
       <div style={buttonContainerStyle}>

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const songController = require('../controllers/songController');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, optionalAuth } = require('../middleware/auth');
 const validateRequest = require('../middleware/validateRequest');
 const { songValidation } = require('../utils/validators');
 
@@ -66,6 +66,16 @@ router.post(
   '/:id/copy',
   authenticateToken,
   songController.copySong
+);
+
+/**
+ * POST /api/songs/:id/listen
+ * Record a song listen (guests can play songs)
+ */
+router.post(
+  '/:id/listen',
+  optionalAuth,
+  songController.recordListen
 );
 
 module.exports = router;

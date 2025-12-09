@@ -100,18 +100,20 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose} onKeyDown={handleKeyDown} tabIndex={-1} ref={modalOverlayRef}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={modalHeaderStyle}>Delete Song?</div>
+        <div style={modalHeaderStyle}>Remove Song?</div>
         <div style={modalBodyStyle}>
           <div style={messageStyle}>
-            Are you sure you want to delete "{song.title}" by {song.artist}?
+            Are you sure you want to remove the song from the catalog?
           </div>
-          <div style={warningStyle}>This song will be removed from all playlists. This action cannot be undone.</div>
+          <div style={{ ...messageStyle, marginTop: "-10px" }}>
+            Doing so will remove it from all of your playlists.
+          </div>
           <div style={buttonsContainerStyle}>
             <button onClick={onClose} style={cancelButtonStyle}>
               Cancel
             </button>
             <button onClick={handleDelete} style={deleteButtonStyle}>
-              Delete
+              Remove Song
             </button>
           </div>
         </div>

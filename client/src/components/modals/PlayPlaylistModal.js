@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { FaPlay, FaPause, FaStepBackward, FaStepForward } from "react-icons/fa"
 import api from "../../services/api"
 
-const PlayPlaylistModal = ({ playlist, onClose }) => {
+const PlayPlaylistModal = ({ playlist, onClose, onListenerRecorded }) => {
   const [currentSongIndex, setCurrentSongIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [repeat, setRepeat] = useState(false)
@@ -16,6 +16,12 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
   const repeatRef = useRef(repeat)
   const currentSongIndexRef = useRef(currentSongIndex)
   const songsLengthRef = useRef(0)
+
+  // Track last counted song to avoid duplicate listen counts
+  const lastCountedSongIdRef = useRef(null)
+
+  // Track if listener has been recorded (prevents duplicate API calls)
+  const listenerRecordedRef = useRef(false)
 
   const songs = playlist.playlist_songs || []
   const currentSong = songs[currentSongIndex]?.song
@@ -34,10 +40,17 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
     songsLengthRef.current = songs.length
   }, [songs.length])
 
-  // Record playlist listener on mount
+  // Record playlist listener on mount (only once per modal open)
   useEffect(() => {
-    api.recordPlaylistListener(playlist.id)
-  }, [playlist.id])
+    if (listenerRecordedRef.current) return  // Already recorded
+    listenerRecordedRef.current = true
+
+    api.recordPlaylistListener(playlist.id).then((result) => {
+      if (result.success && result.data?.isNewListener && onListenerRecorded) {
+        onListenerRecorded(playlist.id)
+      }
+    })
+  }, [playlist.id, onListenerRecorded])
 
   // Load YouTube IFrame API
   useEffect(() => {
@@ -99,6 +112,13 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
           // YT.PlayerState.PLAYING = 1
           if (event.data === 1) {
             setIsPlaying(true)
+            // Record song listen (only once per song)
+            const currentIdx = currentSongIndexRef.current
+            const songAtIndex = songs[currentIdx]?.song
+            if (songAtIndex && songAtIndex.id !== lastCountedSongIdRef.current) {
+              lastCountedSongIdRef.current = songAtIndex.id
+              api.recordSongListen(songAtIndex.id)
+            }
           }
           // YT.PlayerState.PAUSED = 2
           if (event.data === 2) {
@@ -115,11 +135,16 @@ const PlayPlaylistModal = ({ playlist, onClose }) => {
       if (playerRef.current && typeof playerRef.current.loadVideoById === "function") {
         playerRef.current.loadVideoById(currentSong.youtube_id)
         setIsPlaying(true)
+        // Record song listen when switching songs (only once per song)
+        if (currentSong.id !== lastCountedSongIdRef.current) {
+          lastCountedSongIdRef.current = currentSong.id
+          api.recordSongListen(currentSong.id)
+        }
       } else {
         initializePlayer()
       }
     }
-  }, [currentSongIndex, currentSong?.youtube_id, initializePlayer])
+  }, [currentSongIndex, currentSong?.youtube_id, currentSong?.id, initializePlayer])
 
   // Handle song ending - auto-advance with repeat logic
   // Uses refs to avoid stale closure issues with YouTube player callbacks

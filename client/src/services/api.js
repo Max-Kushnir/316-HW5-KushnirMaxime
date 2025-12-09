@@ -88,7 +88,7 @@ const api = {
     }).then((res) => res.json()),
 
   recordPlaylistListener: (playlistId) =>
-    fetch(`${API_BASE_URL}/playlists/${playlistId}/listener`, {
+    fetch(`${API_BASE_URL}/playlists/${playlistId}/listen`, {
       method: "POST",
       credentials: "include",
     }).then((res) => res.json()),
@@ -125,6 +125,12 @@ const api = {
 
   copySong: (id) =>
     fetch(`${API_BASE_URL}/songs/${id}/copy`, {
+      method: "POST",
+      credentials: "include",
+    }).then((res) => res.json()),
+
+  recordSongListen: (songId) =>
+    fetch(`${API_BASE_URL}/songs/${songId}/listen`, {
       method: "POST",
       credentials: "include",
     }).then((res) => res.json()),

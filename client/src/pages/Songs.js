@@ -237,6 +237,8 @@ const Songs = () => {
         setSubmenuOpen(false)
         setSuccess("Song added to playlist!")
         setTimeout(() => setSuccess(""), 3000)
+        // Refresh songs to update playlist_count
+        fetchSongs()
       } else {
         setError(result.message || "Failed to add song to playlist")
       }
@@ -590,7 +592,7 @@ const Songs = () => {
       <div style={twoColumnLayoutStyle}>
         {/* Left Panel - Search Filters + YouTube Player */}
         <div style={leftPanelStyle}>
-          <h2 style={panelTitleStyle}>Songs</h2>
+          <h2 style={panelTitleStyle}>Songs Catalog</h2>
 
           {/* 3 Search Input Fields */}
           <div style={inputContainerStyle}>

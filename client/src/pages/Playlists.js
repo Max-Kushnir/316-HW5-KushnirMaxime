@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useLocation } from "react-router-dom"
 import { FaSearch } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
@@ -228,6 +228,13 @@ const Playlists = () => {
       setError("Error copying playlist")
     }
   }
+
+  // Memoized callback for listener recording (prevents infinite loop)
+  const handleListenerRecorded = useCallback((playlistId) => {
+    setPlaylists(prev => prev.map((p) =>
+      p.id === playlistId ? { ...p, listener_count: (p.listener_count || 0) + 1 } : p
+    ))
+  }, [])
 
   // Styles
   const containerStyle = {
@@ -492,12 +499,12 @@ const Playlists = () => {
 
   const copyButtonStyle = {
     ...actionButtonStyle,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#9C27B0",
   }
 
   const playButtonStyle = {
     ...actionButtonStyle,
-    backgroundColor: "#FF00FF",
+    backgroundColor: "#4CAF50",
   }
 
   const expandButtonStyle = {
@@ -809,6 +816,7 @@ const Playlists = () => {
             setShowPlayModal(false)
             setSelectedPlaylist(null)
           }}
+          onListenerRecorded={handleListenerRecorded}
         />
       )}
       {showDeleteModal && selectedPlaylist && (

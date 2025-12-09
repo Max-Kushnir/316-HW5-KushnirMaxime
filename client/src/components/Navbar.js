@@ -153,7 +153,7 @@ const Navbar = ({ hideNavButtons = false }) => {
               onClick={() => navigate("/songs")}
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
               onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-              style={navButtonStyle}
+              style={{ ...navButtonStyle, backgroundColor: "#2196F3" }}
             >
               Song Catalog
             </button>

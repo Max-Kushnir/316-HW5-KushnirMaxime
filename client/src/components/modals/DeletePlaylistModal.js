@@ -94,17 +94,20 @@ const DeletePlaylistModal = ({ playlist, onClose, onDelete }) => {
   return (
     <div style={modalOverlayStyle} onClick={onClose} onKeyDown={handleKeyDown} tabIndex={-1} ref={modalOverlayRef}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={modalHeaderStyle}>Delete Playlist?</div>
+        <div style={modalHeaderStyle}>Delete playlist?</div>
         <div style={modalBodyStyle}>
           <div style={messageStyle}>
-            Are you sure you want to delete "{playlist.name}"? This action cannot be undone.
+            Are you sure you want to delete the {playlist.name} playlist?
+          </div>
+          <div style={{ ...messageStyle, marginTop: "-10px" }}>
+            Doing so means it will be permanently removed.
           </div>
           <div style={buttonsContainerStyle}>
             <button onClick={onClose} style={cancelButtonStyle}>
               Cancel
             </button>
             <button onClick={handleDelete} style={deleteButtonStyle}>
-              Delete
+              Delete Playlist
             </button>
           </div>
         </div>
