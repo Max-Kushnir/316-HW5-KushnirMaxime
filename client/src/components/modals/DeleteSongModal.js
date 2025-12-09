@@ -28,7 +28,7 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "transparent",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -37,11 +37,12 @@ const DeleteSongModal = ({ song, onClose, onDelete }) => {
 
   const modalStyle = {
     backgroundColor: "#90EE90",
-    borderRadius: "8px",
+    borderRadius: 0,
     maxWidth: "600px",
     width: "90%",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     overflow: "hidden",
+    border: "1px solid black",
   }
 
   const modalHeaderStyle = {

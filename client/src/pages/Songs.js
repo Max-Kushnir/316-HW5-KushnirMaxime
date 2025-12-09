@@ -110,17 +110,25 @@ const Songs = () => {
     }
     let filtered = [...songs]
 
-    // Apply all filters (AND logic) - use applied filters, not input filters
-    if (appliedSearchTitle.trim()) {
-      filtered = filtered.filter((song) => song.title.toLowerCase().includes(appliedSearchTitle.toLowerCase()))
-    }
+    // Check if all filters are empty
+    const noFiltersApplied = !appliedSearchTitle.trim() && !appliedSearchArtist.trim() && !appliedSearchYear.trim()
 
-    if (appliedSearchArtist.trim()) {
-      filtered = filtered.filter((song) => song.artist.toLowerCase().includes(appliedSearchArtist.toLowerCase()))
-    }
+    // If no filters applied and user is logged in, show only user's songs
+    if (noFiltersApplied && user) {
+      filtered = filtered.filter((song) => song.owner_id === user.id)
+    } else {
+      // Apply all filters (AND logic) - use applied filters, not input filters
+      if (appliedSearchTitle.trim()) {
+        filtered = filtered.filter((song) => song.title.toLowerCase().includes(appliedSearchTitle.toLowerCase()))
+      }
 
-    if (appliedSearchYear.trim()) {
-      filtered = filtered.filter((song) => song.year.toString().includes(appliedSearchYear.trim()))
+      if (appliedSearchArtist.trim()) {
+        filtered = filtered.filter((song) => song.artist.toLowerCase().includes(appliedSearchArtist.toLowerCase()))
+      }
+
+      if (appliedSearchYear.trim()) {
+        filtered = filtered.filter((song) => song.year.toString().includes(appliedSearchYear.trim()))
+      }
     }
 
     // Sort
@@ -393,13 +401,16 @@ const Songs = () => {
   }
 
   const sortSelectStyle = {
-    padding: "8px 12px",
+    padding: "0",
     fontSize: "14px",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    backgroundColor: "white",
+    border: "none",
+    backgroundColor: "transparent",
+    color: "#2196F3",
     cursor: "pointer",
-    minWidth: "200px",
+    fontWeight: "500",
+    appearance: "none",
+    WebkitAppearance: "none",
+    MozAppearance: "none",
   }
 
   const resultsInfoStyle = {
@@ -430,9 +441,12 @@ const Songs = () => {
     const isOwned = user?.id === song.owner_id
     const isSelected = selectedSongForPreview?.id === song.id
 
+    // Border: based solely on ownership (red outline for owned songs)
+    const border = isOwned ? "2px solid red" : "1px solid #ddd"
+
     return {
-      backgroundColor: isOwned ? "#FFF9C4" : "white",
-      border: isSelected ? "2px solid #FF6B00" : "1px solid #ddd",
+      backgroundColor: isSelected ? "#FFB74D" : "#FFF9C4",
+      border,
       borderRadius: "8px",
       padding: "12px 16px",
       cursor: "pointer",

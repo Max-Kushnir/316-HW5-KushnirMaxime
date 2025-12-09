@@ -257,13 +257,13 @@ const Playlists = () => {
 
   const inputFieldStyle = {
     height: "44px",
+    width: "100%",
     padding: "10px 40px 10px 12px",
     fontSize: "14px",
     border: "1px solid #ccc",
     borderRadius: "4px",
     backgroundColor: "white",
     outline: "none",
-    position: "relative",
   }
 
   const inputContainerStyle = {
@@ -340,13 +340,16 @@ const Playlists = () => {
   }
 
   const sortSelectStyle = {
-    padding: "8px 12px",
+    padding: "0",
     fontSize: "14px",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
-    backgroundColor: "white",
+    border: "none",
+    backgroundColor: "transparent",
+    color: "#2196F3",
     cursor: "pointer",
-    minWidth: "200px",
+    fontWeight: "500",
+    appearance: "none",
+    WebkitAppearance: "none",
+    MozAppearance: "none",
   }
 
   const resultsCountStyle = {

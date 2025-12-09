@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { FaCopy } from "react-icons/fa"
 import api from "../../services/api"
 
 const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
+  const navigate = useNavigate()
   const modalOverlayRef = useRef(null)
   const [name, setName] = useState(playlist.name)
   const [songs, setSongs] = useState(playlist.playlist_songs || [])
@@ -302,7 +304,7 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "transparent",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -312,12 +314,13 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
 
   const modalStyle = {
     backgroundColor: "#90EE90", // Light green per Section 9.1
-    borderRadius: "8px",
+    borderRadius: 0,
     maxWidth: "600px",
     width: "90%",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     overflow: "hidden",
     margin: "20px auto",
+    border: "1px solid black",
   }
 
   const modalHeaderStyle = {
@@ -388,12 +391,14 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "8px",
-    borderBottom: "1px solid #eee",
+    marginBottom: "4px",
     fontSize: "14px",
     cursor: "grab",
-    backgroundColor: draggedIndex === index ? "#E8F5E9" : dragOverIndex === index ? "#FFF9C4" : "transparent",
+    backgroundColor: draggedIndex === index ? "#E8F5E9" : dragOverIndex === index ? "#FFEB3B" : "#FFF9C4",
     opacity: draggedIndex === index ? 0.5 : 1,
-    borderLeft: dragOverIndex === index ? "3px solid #9C27B0" : "3px solid transparent",
+    borderRadius: "4px",
+    border: "1px solid black",
+    borderLeft: dragOverIndex === index ? "3px solid #9C27B0" : "1px solid black",
     transition: "background-color 0.15s, border-left 0.15s",
   })
 
@@ -409,8 +414,8 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
   }
 
   const iconButtonStyle = {
-    backgroundColor: "#9C27B0", // Purple per spec
-    color: "white",
+    backgroundColor: "transparent",
+    color: "black",
     border: "none",
     padding: "4px 8px",
     borderRadius: "3px",
@@ -419,16 +424,9 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
     minWidth: "28px",
   }
 
-  const dragHandleStyle = {
-    cursor: "grab",
-    color: "#999",
-    marginRight: "8px",
-    fontSize: "16px",
-  }
-
   const deleteButtonStyle = {
-    backgroundColor: "#E91E63", // Red delete per Section 9.1
-    color: "white",
+    backgroundColor: "transparent",
+    color: "black",
     border: "none",
     padding: "4px 8px",
     borderRadius: "3px",
@@ -508,23 +506,41 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
 
           {/* Playlist Name */}
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Playlist Name</label>
-            <div style={inputContainerStyle}>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                style={inputStyle}
-              />
-              {name && (
-                <button
-                  type="button"
-                  onClick={() => handleNameChange("")}
-                  style={clearButtonStyle}
-                >
-                  ⊗
-                </button>
-              )}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ ...inputContainerStyle, flex: 1 }}>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  style={inputStyle}
+                />
+                {name && (
+                  <button
+                    type="button"
+                    onClick={() => handleNameChange("")}
+                    style={clearButtonStyle}
+                  >
+                    ⊗
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/songs")}
+                style={{
+                  backgroundColor: "#9C27B0",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 14px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                }}
+                title="Add songs from catalog"
+              >
+                +♪
+              </button>
             </div>
           </div>
 
@@ -548,9 +564,6 @@ const EditPlaylistModal = ({ playlist, onClose, onSave }) => {
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
                   >
-                    {/* Drag handle */}
-                    <span style={dragHandleStyle} title="Drag to reorder">☰</span>
-
                     {/* Song display: "1. Song Title by Artist (Year)" */}
                     <div style={songInfoStyle}>
                       {index + 1}. {playlistSong.song?.title || "Unknown"} by{" "}
