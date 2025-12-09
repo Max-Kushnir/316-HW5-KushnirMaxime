@@ -15,7 +15,7 @@ const findAll = async (filters = {}, sortBy = 'created_at', sortOrder = 'DESC', 
     {
       model: User,
       as: 'owner',
-      attributes: ['username'],
+      attributes: ['username', 'avatar_image'],
       required: false
     },
     {
@@ -31,6 +31,10 @@ const findAll = async (filters = {}, sortBy = 'created_at', sortOrder = 'DESC', 
 
   if (filters.name) {
     where.name = { [Op.iLike]: `%${filters.name}%` };
+  }
+
+  if (filters.ownedBy) {
+    where.owner_id = filters.ownedBy;
   }
 
   if (filters.username) {
@@ -94,7 +98,7 @@ const findAll = async (filters = {}, sortBy = 'created_at', sortOrder = 'DESC', 
       }))
     };
   });
-};;
+};
 
 /**
  * Find playlist by ID with owner info and songs
@@ -107,7 +111,7 @@ const findById = async (id) => {
       {
         model: User,
         as: 'owner',
-        attributes: ['username']
+        attributes: ['username', 'avatar_image']
       },
       {
         model: PlaylistSong,
@@ -164,7 +168,8 @@ const create = async (name, ownerId) => {
     owner_id: ownerId,
     listener_count: 0
   });
-  return playlist.toJSON();
+  // Return full playlist with owner data (including avatar_image)
+  return findById(playlist.id);
 };
 
 /**

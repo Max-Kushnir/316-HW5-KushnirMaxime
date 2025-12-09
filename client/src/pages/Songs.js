@@ -150,8 +150,8 @@ const Songs = () => {
           compareValue = (b.listen_count || 0) - (a.listen_count || 0)
           break
         case "playlists":
-          const aPlaylistCount = a.playlist_songs?.length || 0
-          const bPlaylistCount = b.playlist_songs?.length || 0
+          const aPlaylistCount = a.playlist_count || 0
+          const bPlaylistCount = b.playlist_count || 0
           compareValue = bPlaylistCount - aPlaylistCount
           break
         default:
@@ -739,7 +739,7 @@ const Songs = () => {
 
                     <div style={songMetaRowStyle}>
                       <span>Listens: {(song.listen_count || 0).toLocaleString()}</span>
-                      <span>Playlists: {song.playlist_songs?.length || 0}</span>
+                      <span>Playlists: {song.playlist_count || 0}</span>
                     </div>
 
                     {/* Ellipsis Menu */}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { FaLock, FaUser } from "react-icons/fa"
 import { useAuth } from "../context/AuthContext"
 
@@ -49,6 +49,8 @@ const InputWithClear = ({ value, onChange, type = "text", disabled = false, inpu
 const Account = () => {
   const { user, updateProfile } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnPath = location.state?.from || "/playlists"
   const [username, setUsername] = useState(user?.username || "")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -165,7 +167,7 @@ const Account = () => {
       setPassword("")
       setConfirmPassword("")
       setAvatar(null)
-      setTimeout(() => navigate("/playlists"), 2000)
+      setTimeout(() => navigate(returnPath), 2000)
     } else {
       setError(result.message || "Update failed")
     }
@@ -444,7 +446,7 @@ const Account = () => {
                   </div>
 
                   <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-                    <button type="button" onClick={() => navigate("/playlists")} style={cancelButtonStyle}>
+                    <button type="button" onClick={() => navigate(returnPath)} style={cancelButtonStyle}>
                       Cancel
                     </button>
                     <button type="submit" disabled={!isFormValid || loading} style={completeButtonStyle}>

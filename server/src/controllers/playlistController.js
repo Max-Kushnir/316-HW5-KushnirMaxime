@@ -12,7 +12,7 @@ const { v4: uuidv4 } = require('uuid');
  */
 const getAllPlaylists = async (req, res, next) => {
   try {
-    const { name, username, songTitle, songArtist, songYear, sortBy, sortOrder } = req.query;
+    const { name, username, songTitle, songArtist, songYear, sortBy, sortOrder, ownedBy } = req.query;
 
     const filters = {};
     if (name) filters.name = name;
@@ -20,6 +20,7 @@ const getAllPlaylists = async (req, res, next) => {
     if (songTitle) filters.songTitle = songTitle;
     if (songArtist) filters.songArtist = songArtist;
     if (songYear) filters.songYear = parseInt(songYear);
+    if (ownedBy) filters.ownedBy = parseInt(ownedBy);
 
     const userId = req.user ? req.user.id : null;
 

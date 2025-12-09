@@ -44,18 +44,23 @@ const Playlists = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null)
 
   useEffect(() => {
-    fetchPlaylists()
-  }, [location.key])
+    // Default view: logged-in users see their own playlists (Section 11.5)
+    if (user) {
+      fetchPlaylists({ ownedBy: user.id })
+    } else {
+      fetchPlaylists()
+    }
+  }, [location.key, user])
 
   useEffect(() => {
     filterAndSortPlaylists()
   }, [playlists, appliedPlaylistNameFilter, appliedUserNameFilter, appliedSongTitleFilter, appliedSongArtistFilter, appliedSongYearFilter, sortBy])
 
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = async (params = {}) => {
     try {
       setLoading(true)
       setError("")
-      const result = await api.getPlaylists()
+      const result = await api.getPlaylists(params)
       if (result.success) {
         setPlaylists(result.data.playlists || [])
       } else {
@@ -123,7 +128,9 @@ const Playlists = () => {
     setFilteredPlaylists(filtered)
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    // Search fetches ALL playlists (no ownedBy filter) - searches across all users
+    await fetchPlaylists()
     // Copy input values to applied values (per UC 2.12 - search on button/Enter only)
     setAppliedPlaylistNameFilter(playlistNameFilter)
     setAppliedUserNameFilter(userNameFilter)
@@ -144,6 +151,12 @@ const Playlists = () => {
     setAppliedSongTitleFilter("")
     setAppliedSongArtistFilter("")
     setAppliedSongYearFilter("")
+    // Return to default view: owned playlists for logged-in users (Section 11.5)
+    if (user) {
+      fetchPlaylists({ ownedBy: user.id })
+    } else {
+      fetchPlaylists()
+    }
   }
 
   const togglePlaylistExpanded = (playlistId) => {
@@ -412,6 +425,14 @@ const Playlists = () => {
     color: "white",
     fontWeight: "bold",
     fontSize: "20px",
+    flexShrink: 0,
+  }
+
+  const avatarImageStyle = {
+    width: "48px",
+    height: "48px",
+    borderRadius: "50%",
+    objectFit: "cover",
     flexShrink: 0,
   }
 
@@ -684,9 +705,17 @@ const Playlists = () => {
                   <div key={playlist.id} style={playlistCardStyle}>
                     <div style={cardHeaderStyle}>
                       {/* Avatar */}
-                      <div style={avatarStyle}>
-                        {playlist.owner?.username?.[0]?.toUpperCase() || "?"}
-                      </div>
+                      {playlist.owner?.avatar_image ? (
+                        <img
+                          src={playlist.owner.avatar_image}
+                          alt={playlist.owner.username}
+                          style={avatarImageStyle}
+                        />
+                      ) : (
+                        <div style={avatarStyle}>
+                          {playlist.owner?.username?.[0]?.toUpperCase() || "?"}
+                        </div>
+                      )}
 
                       {/* Playlist Info */}
                       <div style={cardInfoStyle}>

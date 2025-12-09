@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { FaHome, FaUser } from "react-icons/fa"
 
 const Navbar = ({ hideNavButtons = false }) => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [showMenu, setShowMenu] = useState(false)
 
   const handleLogout = async () => {
@@ -183,7 +184,7 @@ const Navbar = ({ hideNavButtons = false }) => {
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#CE93D8")}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   onClick={() => {
-                    navigate("/account")
+                    navigate("/account", { state: { from: location.pathname } })
                     setShowMenu(false)
                   }}
                   style={menuItemStyle}
